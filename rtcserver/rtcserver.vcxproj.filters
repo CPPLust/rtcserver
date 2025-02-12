@@ -16,6 +16,9 @@
     <Filter Include="源文件\base">
       <UniqueIdentifier>{430baca7-64a7-48c5-985f-9c7a19ea5f1a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\server">
+      <UniqueIdentifier>{f90d05f9-09f1-4380-88c6-7ca80cd4bb50}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -30,6 +33,9 @@
     <ClCompile Include="src\base\mypath.cpp">
       <Filter>源文件\base</Filter>
     </ClCompile>
+    <ClCompile Include="src\server\signaling_server.cpp">
+      <Filter>源文件\server</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\base\conf.h">
@@ -40,6 +46,9 @@
     </ClInclude>
     <ClInclude Include="src\base\mypath.h">
       <Filter>源文件\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\server\signaling_server.h">
+      <Filter>源文件\server</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -3,9 +3,11 @@
 #include "base/conf.h"
 #include "base/log.h"
 #include "base/mypath.h"
+#include "server/signaling_server.h"
 
 xrtc::GeneralConf* g_conf = nullptr;
 xrtc::XrtcLog* g_log = nullptr;
+xrtc::SignalingServer* g_signaling_server = nullptr;
 
 int init_general_conf(const char* filename) {
 	if (!filename) {
@@ -38,6 +40,17 @@ int init_log(const std::string& log_dir, const std::string& log_name,
 	return 0;
 }
 
+int init_signaling_server() {
+	g_signaling_server = new xrtc::SignalingServer();
+	std::string conf_path = xrtc::get_bin_path() + MY_PATH_STRING + "conf/signaling_server.yaml";
+	int ret = g_signaling_server->init(conf_path.c_str());
+	if (ret != 0) {
+		return -1;
+	}
+
+
+	return 0;
+}
 
 int main() {
 
@@ -58,6 +71,13 @@ int main() {
 	RTC_LOG(LS_VERBOSE) << "hello world";
 	std::cout << "hello world" << std::endl;
 
+	// ³õÊ¼»¯signaling server
+	ret = init_signaling_server();
+	if (ret != 0) {
+		return -1;
+	}
+
+	g_log->join();
 	getchar();
 	return 0;
 }

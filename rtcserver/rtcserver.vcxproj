@@ -23,11 +23,13 @@
     <ClCompile Include="src\base\log.cpp" />
     <ClCompile Include="src\base\mypath.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\server\signaling_server.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\base\conf.h" />
     <ClInclude Include="src\base\log.h" />
     <ClInclude Include="src\base\mypath.h" />
+    <ClInclude Include="src\server\signaling_server.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\3rdpart\libwebrtc\libwebrtc.vcxproj">
