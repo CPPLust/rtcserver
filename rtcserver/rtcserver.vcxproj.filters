@@ -36,6 +36,9 @@
     <ClCompile Include="src\server\signaling_server.cpp">
       <Filter>源文件\server</Filter>
     </ClCompile>
+    <ClCompile Include="src\base\socket.cpp">
+      <Filter>源文件\base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\base\conf.h">
@@ -49,6 +52,9 @@
     </ClInclude>
     <ClInclude Include="src\server\signaling_server.h">
       <Filter>源文件\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\socket.h">
+      <Filter>源文件\base</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

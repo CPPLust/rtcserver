@@ -22,6 +22,7 @@
     <ClCompile Include="src\base\conf.cpp" />
     <ClCompile Include="src\base\log.cpp" />
     <ClCompile Include="src\base\mypath.cpp" />
+    <ClCompile Include="src\base\socket.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\server\signaling_server.cpp" />
   </ItemGroup>
@@ -29,6 +30,7 @@
     <ClInclude Include="src\base\conf.h" />
     <ClInclude Include="src\base\log.h" />
     <ClInclude Include="src\base\mypath.h" />
+    <ClInclude Include="src\base\socket.h" />
     <ClInclude Include="src\server\signaling_server.h" />
   </ItemGroup>
   <ItemGroup>
@@ -124,7 +126,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;WIN32;WEBRTC_WIN;NOMINMAX;YAML_CPP_STATIC_DEFINE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;WIN32;WEBRTC_WIN;NOMINMAX;YAML_CPP_STATIC_DEFINE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>../3rdpart\utilslib\src;../3rdpart\libev_win;../depend\win\debug\absl\include;../depend\win\debug\yaml\include;./src;../3rdpart\libwebrtc\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -132,7 +134,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>yaml-cppd.lib;absl_base.lib;absl_strings.lib;absl_strerror.lib;absl_throw_delegate.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>yaml-cppd.lib;absl_base.lib;absl_strings.lib;absl_strerror.lib;absl_throw_delegate.lib;winmm.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>../depend\win\debug\absl\lib;../depend\win\debug\yaml\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
