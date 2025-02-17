@@ -4,6 +4,11 @@
 #include "base/log.h"
 #include "base/mypath.h"
 
+#if defined(WEBRTC_POSIX)
+#include <sys/stat.h>
+#include <sys/types.h>
+#endif
+
 namespace xrtc {
 
 XrtcLog::XrtcLog(const std::string& log_dir,

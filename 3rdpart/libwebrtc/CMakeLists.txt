@@ -2,6 +2,8 @@ cmake_minimum_required (VERSION 3.5)
 
 project(webrtc)
 
+set( TOP_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../ )
+
 set(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}/${CMAKE_SYSTEM_NAME})
 
 include_directories(
@@ -9,6 +11,10 @@ include_directories(
     "${PROJECT_SOURCE_DIR}/third_party/abseil-cpp"
     "${PROJECT_SOURCE_DIR}/third_party/"
     "${PROJECT_SOURCE_DIR}/third_party/libyuv/include"
+    "${TOP_PATH}/depend/centos/third_party/libyuv/include"
+    "${TOP_PATH}/depend/centos/absl/include"
+    "${TOP_PATH}/depend/centos"
+    "${TOP_PATH}/depend/centos/openssl/include"
     "${PROJECT_SOURCE_DIR}"
 )
 
