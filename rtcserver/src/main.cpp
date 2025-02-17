@@ -3,6 +3,7 @@
 #include "base/conf.h"
 #include "base/log.h"
 #include "base/mypath.h"
+#include "base/socket.h"
 #include "server/signaling_server.h"
 
 xrtc::GeneralConf* g_conf = nullptr;
@@ -70,6 +71,9 @@ int main() {
 
 	RTC_LOG(LS_VERBOSE) << "hello world";
 	std::cout << "hello world" << std::endl;
+
+	// 静态成员确保只在程序启动时初始化一次
+	static xrtc::WinsockInitializer winsockInitializer;
 
 	// 初始化signaling server
 	ret = init_signaling_server();

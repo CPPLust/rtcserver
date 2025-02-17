@@ -2,6 +2,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include "server/signaling_server.h"
+#include "base/socket.h"
 
 namespace xrtc {
 
@@ -31,6 +32,10 @@ int SignalingServer::init(const char* conf_file) {
             << ", column: " << e.mark.column + 1 << ", error: " << e.msg;
         return -1;
     }
+
+
+    // ´´½¨tcp server
+    _listen_fd = create_tcp_server(_options.host.c_str(), _options.port);
     
     return 0;
 }
