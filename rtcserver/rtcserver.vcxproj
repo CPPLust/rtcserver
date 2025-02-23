@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\base\conf.cpp" />
+    <ClCompile Include="src\base\event_loop.cpp" />
     <ClCompile Include="src\base\log.cpp" />
     <ClCompile Include="src\base\mypath.cpp" />
     <ClCompile Include="src\base\socket.cpp" />
@@ -28,12 +29,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\base\conf.h" />
+    <ClInclude Include="src\base\event_loop.h" />
     <ClInclude Include="src\base\log.h" />
     <ClInclude Include="src\base\mypath.h" />
     <ClInclude Include="src\base\socket.h" />
     <ClInclude Include="src\server\signaling_server.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\3rdpart\libev_win\libev\libev.vcxproj">
+      <Project>{f3f50f16-dc1d-4fe0-b2d4-93e672cd9c24}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\3rdpart\libwebrtc\libwebrtc.vcxproj">
       <Project>{28daabe9-aa82-462d-a9a5-c756b0e1c2c0}</Project>
     </ProjectReference>
@@ -128,14 +133,14 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;WIN32;WEBRTC_WIN;NOMINMAX;YAML_CPP_STATIC_DEFINE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../3rdpart\utilslib\src;../3rdpart\libev_win;../depend\win\debug\absl\include;../depend\win\debug\yaml\include;./src;../3rdpart\libwebrtc\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../3rdpart\libev_win\src;../3rdpart\utilslib\src;../3rdpart\libev_win;../depend\win\debug\absl\include;../depend\win\debug\yaml\include;./src;../3rdpart\libwebrtc\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>yaml-cppd.lib;absl_base.lib;absl_strings.lib;absl_strerror.lib;absl_throw_delegate.lib;winmm.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>../depend\win\debug\absl\lib;../depend\win\debug\yaml\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>yaml-cppd.lib;absl_base.lib;absl_strings.lib;absl_strerror.lib;absl_throw_delegate.lib;winmm.lib;ws2_32.lib;libuv.lib;Iphlpapi.lib;Userenv.lib;DbgHelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../depend\win\debug\uv\lib;../depend\win\debug\absl\lib;../depend\win\debug\yaml\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

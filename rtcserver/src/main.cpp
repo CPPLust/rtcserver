@@ -5,6 +5,7 @@
 #include "base/mypath.h"
 #include "base/socket.h"
 #include "server/signaling_server.h"
+#include <signal.h>
 
 xrtc::GeneralConf* g_conf = nullptr;
 xrtc::XrtcLog* g_log = nullptr;
@@ -37,6 +38,7 @@ int init_log(const std::string& log_dir, const std::string& log_name,
 		fprintf(stderr, "init log failed\n");
 		return -1;
 	}
+    g_log->start();
 
 	return 0;
 }
@@ -53,6 +55,14 @@ int init_signaling_server() {
 	return 0;
 }
 
+static void process_signal(int sig) {
+    RTC_LOG(LS_INFO) << "receive signal: " << sig;
+    if (SIGINT == sig || SIGTERM == sig) {
+        if (g_signaling_server) {
+            g_signaling_server->stop();
+        }
+    }
+}
 int main() {
 
 	std::string conf_path = xrtc::get_bin_path() + MY_PATH_STRING + "conf/general.yaml";
@@ -80,8 +90,12 @@ int main() {
 	if (ret != 0) {
 		return -1;
 	}
+    signal(SIGINT, process_signal);
+    signal(SIGTERM, process_signal);
 
-	g_log->join();
+	g_signaling_server->start();
+    g_signaling_server->join();
+	
 	getchar();
 	return 0;
 }

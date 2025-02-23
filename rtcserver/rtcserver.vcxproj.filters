@@ -39,6 +39,9 @@
     <ClCompile Include="src\base\socket.cpp">
       <Filter>源文件\base</Filter>
     </ClCompile>
+    <ClCompile Include="src\base\event_loop.cpp">
+      <Filter>源文件\base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\base\conf.h">
@@ -54,6 +57,9 @@
       <Filter>源文件\server</Filter>
     </ClInclude>
     <ClInclude Include="src\base\socket.h">
+      <Filter>源文件\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\event_loop.h">
       <Filter>源文件\base</Filter>
     </ClInclude>
   </ItemGroup>
