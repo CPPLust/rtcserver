@@ -10,6 +10,8 @@
 
 #if defined(_WIN32)
 #define  close closesocket
+#else
+#include <fcntl.h>
 #endif
 
 namespace xrtc {

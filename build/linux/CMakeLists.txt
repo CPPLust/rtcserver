@@ -15,6 +15,7 @@ include_directories( ${SRC_PATH}/
     					"${TOP_PATH}/depend/centos/absl/include"
     					"${TOP_PATH}/depend/centos"
     					"${TOP_PATH}/depend/centos/yaml/include/"
+   					"${TOP_PATH}/depend/centos/ev/include"
    					"${TOP_PATH}/depend/centos/openssl/include"
 					 ${TOP_PATH}/3rdpart/libwebrtc/src 
 					 )
@@ -23,7 +24,7 @@ message(${CMAKE_CURRENT_SOURCE_DIR})
 
 SET(CMAKE_EXE_LINKER_FLAGS " -no-pie")
 
-add_definitions("-g -pipe -W -Wall -fPIC -std=c++14 -DWEBRTC_POSIX -DWEBRTC_LINUX")
+add_definitions("-g -pipe -W -Wall -fPIC -std=c++14 -DOS_LINUX  -DWEBRTC_POSIX -DWEBRTC_LINUX")
 
 
 file(GLOB all_src
@@ -42,12 +43,13 @@ link_directories(
         "${TOP_PATH}/depend/centos/third_party/jsoncpp/"
         "${TOP_PATH}/depend/centos/absl/lib64"
         "${TOP_PATH}/depend/centos/openssl/lib"
+        "${TOP_PATH}/depend/centos/ev/lib"
         )
 
 
 add_executable(xrtcserver ${all_src})
 
 
-target_link_libraries(xrtcserver  libyaml-cpp.a  libjsoncpp.a     libwebrtc.a  libabsl_strings.a libabsl_throw_delegate.a  libssl.a libcrypto.a  -lpthread -ldl)
+target_link_libraries(xrtcserver  libyaml-cpp.a  libjsoncpp.a     libwebrtc.a  libev.a libabsl_strings.a libabsl_throw_delegate.a  libssl.a libcrypto.a  -lpthread -ldl)
 
 

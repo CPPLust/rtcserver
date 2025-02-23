@@ -19,3 +19,6 @@ else
     make -j5
 fi
 
+
+cd -
+mv out/xrtcserver .
