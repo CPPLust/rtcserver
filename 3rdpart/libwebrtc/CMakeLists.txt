@@ -41,6 +41,7 @@ endif()
 
 file(GLOB all_src
     "./src/rtc_base/*.cc"
+    "./src/rtc_base/yuan/*.cc"
     "./src/rtc_base/strings/*.cc"
     "./src/rtc_base/synchronization/*.cc"
     "./src/rtc_base/deprecated/*.cc"
