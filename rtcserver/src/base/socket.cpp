@@ -149,6 +149,163 @@ int create_udp_server(const char* addr, int port)
 	return sock;
 }
 
+int generic_accept(int sock, struct sockaddr* sa, socklen_t* len) {
+    int fd = -1;
+
+    while (1) {
+        fd = accept(sock, sa, len);
+        if (-1 == fd) {
+            if (EINTR == errno) {
+                continue;
+            } else {
+                RTC_LOG(LS_WARNING) << "tcp accept error: " << strerror(errno)
+                    << ", errno: " << errno;
+                return -1;
+            }
+        }
+
+        break;
+    }
+
+    return fd;
+}
+
+int tcp_accept(int sock, char* host, int* port) {
+    struct sockaddr_in sa;
+    socklen_t salen = sizeof(sa);
+    int fd = generic_accept(sock, (struct sockaddr*)&sa, &salen);
+    if (-1 == fd) {
+        return -1;
+    }
+    
+    if (host) {
+        if (inet_ntop(AF_INET, &(sa.sin_addr), host, INET_ADDRSTRLEN) == NULL) {
+            perror("inet_ntop failed");
+            // 错误处理
+        }
+        else {
+            printf("Host IP: %s\n", host);
+        }
+        //strcpy(host, inet_ntoa(sa.sin_addr));
+    }
+
+    if (port) {
+        *port = ntohs(sa.sin_port);
+    }
+
+    return fd;
+}
+int sock_setnonblock(int sock) 
+{
+#ifdef _WIN32
+	unsigned long l = 1;
+	int n = ioctlsocket(sock, FIONBIO, &l);
+	if (n != 0)
+	{
+		//LogERR("errno = %d reason:%s %d\n", errno, strerror(errno), fd);
+		return false;
+	}
+#else
+    int flags = fcntl(sock, F_GETFL);
+    if (-1 == flags) {
+        RTC_LOG(LS_WARNING) << "fcntl(F_GETFL) error: " << strerror(errno)
+            << ", errno: " << errno << ", fd: " << sock;
+        return -1;
+    }
+
+    if (-1 == fcntl(sock, F_SETFL, flags | O_NONBLOCK)) {
+        RTC_LOG(LS_WARNING) << "fcntl(F_SETFL) error: " << strerror(errno)
+            << ", errno: " << errno << ", fd: " << sock;
+        return -1;
+    }
+#endif
+    return 0;
+}
+
+int sock_setnodelay(int sock) {
+    int yes = 1;
+    int ret = setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (const char*) & yes, sizeof(yes));
+    if (-1 == ret) {
+        RTC_LOG(LS_WARNING) << "set nodelay error: " << strerror(errno)
+            << ", errno: " << errno << ", fd: " << sock;
+        return -1;
+    }
+    return 0;
+}
+int sock_peer_to_str(int sock, char* ip, int* port) {
+    struct sockaddr_in sa;
+    socklen_t salen;
+    
+    int ret = getpeername(sock, (struct sockaddr*)&sa, &salen);
+    if (-1 == ret) {
+        if (ip) {
+            ip[0] = '?';
+            ip[1] = '\0';
+        }
+
+        if (port) {
+            *port = 0;
+        }
+
+        return -1;
+    }
+
+    if (ip) {
+        //strcpy(ip, inet_ntoa(sa.sin_addr));
+		if (inet_ntop(AF_INET, &(sa.sin_addr), ip, INET_ADDRSTRLEN) == NULL) {
+			perror("inet_ntop failed");
+			// 错误处理
+		}
+		else {
+			printf("Host IP: %s\n", ip);
+		}
+    }
+
+    if (port) {
+        *port = ntohs(sa.sin_port);
+    }
+
+    return 0;
+}
+int sock_read_data(int sock, char* buf, size_t len) {
+#ifdef _WIN32
+    int nread = recv(sock, buf, static_cast<int>(len), 0);
+    if (nread == SOCKET_ERROR) {
+        if (WSAGetLastError() == WSAEWOULDBLOCK) {
+            nread = 0;
+        }
+        else {
+            RTC_LOG(LS_WARNING) << "sock read failed, error: " << strerror(WSAGetLastError())
+                << ", errno: " << WSAGetLastError() << ", fd: " << sock;
+            return -1;
+        }
+    }
+    else if (nread == 0) {
+        RTC_LOG(LS_WARNING) << "connection closed, fd: " << sock;
+        return -1;
+    }
+#else
+    int nread = read(sock, buf, len);
+    if (-1 == nread) {
+        if (EAGAIN == errno || EWOULDBLOCK == errno) {
+            nread = 0;
+        }
+        else {
+            RTC_LOG(LS_WARNING) << "sock read failed, error: " << strerror(errno)
+                << ", errno: " << errno << ", fd: " << sock;
+            return -1;
+        }
+    }
+    else if (0 == nread) {
+        RTC_LOG(LS_WARNING) << "connection closed, fd: " << sock;
+        return -1;
+    }
+#endif
+
+
+    
+    return nread;
+}
 } // namespace xrtc
 
 

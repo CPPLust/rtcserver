@@ -491,6 +491,7 @@
     <ClCompile Include="src\rtc_base\openssl_session_cache.cc" />
     <ClCompile Include="src\rtc_base\openssl_stream_adapter.cc" />
     <ClCompile Include="src\rtc_base\openssl_utility.cc" />
+    <ClCompile Include="src\rtc_base\pc\sds.cc" />
     <ClCompile Include="src\rtc_base\physical_socket_server.cc" />
     <ClCompile Include="src\rtc_base\platform_thread.cc" />
     <ClCompile Include="src\rtc_base\platform_thread_types.cc" />
@@ -501,7 +502,6 @@
     <ClCompile Include="src\rtc_base\rate_tracker.cc" />
     <ClCompile Include="src\rtc_base\rtc_certificate.cc" />
     <ClCompile Include="src\rtc_base\rtc_certificate_generator.cc" />
-    <ClCompile Include="src\rtc_base\sds.cc" />
     <ClCompile Include="src\rtc_base\socket.cc" />
     <ClCompile Include="src\rtc_base\socket_address.cc" />
     <ClCompile Include="src\rtc_base\ssl_adapter.cc" />
@@ -599,6 +599,7 @@
     <ClInclude Include="src\rtc_base\experiments\field_trial_parser.h" />
     <ClInclude Include="src\rtc_base\internal\default_socket_server.h" />
     <ClInclude Include="src\rtc_base\network\sent_packet.h" />
+    <ClInclude Include="src\rtc_base\pc\sds.h" />
     <ClInclude Include="src\rtc_base\strings\json.h" />
     <ClInclude Include="src\rtc_base\strings\string_builder.h" />
     <ClInclude Include="src\rtc_base\third_party\base64\base64.h" />

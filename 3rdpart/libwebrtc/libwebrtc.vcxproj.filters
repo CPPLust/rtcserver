@@ -387,9 +387,6 @@
     <ClCompile Include="src\rtc_base\rtc_certificate_generator.cc">
       <Filter>源文件\src\rtc_base</Filter>
     </ClCompile>
-    <ClCompile Include="src\rtc_base\sds.cc">
-      <Filter>源文件\src\rtc_base</Filter>
-    </ClCompile>
     <ClCompile Include="src\rtc_base\socket.cc">
       <Filter>源文件\src\rtc_base</Filter>
     </ClCompile>
@@ -1491,6 +1488,9 @@
     <ClCompile Include="third_party\pffft\src\test_pffft.c">
       <Filter>源文件\third_party\pffft</Filter>
     </ClCompile>
+    <ClCompile Include="src\rtc_base\pc\sds.cc">
+      <Filter>源文件\src\rtc_base\win</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\rtc_base\strings\json.h">
@@ -1666,6 +1666,9 @@
     </ClInclude>
     <ClInclude Include="third_party\pffft\src\pffft.h">
       <Filter>源文件\third_party\pffft</Filter>
+    </ClInclude>
+    <ClInclude Include="src\rtc_base\pc\sds.h">
+      <Filter>源文件\src\rtc_base\win</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

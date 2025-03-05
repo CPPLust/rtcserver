@@ -42,6 +42,12 @@
     <ClCompile Include="src\base\event_loop.cpp">
       <Filter>源文件\base</Filter>
     </ClCompile>
+    <ClCompile Include="src\server\signaling_worker.cpp">
+      <Filter>源文件\server</Filter>
+    </ClCompile>
+    <ClCompile Include="src\server\tcp_connection.cpp">
+      <Filter>源文件\server</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\base\conf.h">
@@ -60,6 +66,18 @@
       <Filter>源文件\base</Filter>
     </ClInclude>
     <ClInclude Include="src\base\event_loop.h">
+      <Filter>源文件\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\server\signaling_worker.h">
+      <Filter>源文件\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\lock_free_queue.h">
+      <Filter>源文件\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\server\tcp_connection.h">
+      <Filter>源文件\server</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\xhead.h">
       <Filter>源文件\base</Filter>
     </ClInclude>
   </ItemGroup>
