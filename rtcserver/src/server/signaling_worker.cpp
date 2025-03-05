@@ -183,8 +183,8 @@ void conn_time_cb(EventLoop* el, TimerWatcher* /*w*/, void* data) {
 
 void SignalingWorker::_process_timeout(TcpConnection* c) {
     if (_el->now() - c->last_interaction >= (unsigned long)_options.connection_timeout) {
-        RTC_LOG(LS_INFO) << "connection timeout, fd: " << c->fd; 
-        //_close_conn(c);
+        RTC_LOG(LS_INFO) << "connection timeout timer, fd: " << c->fd; 
+        _close_conn(c);
     }
 }
 void SignalingWorker::_new_conn(int fd) {

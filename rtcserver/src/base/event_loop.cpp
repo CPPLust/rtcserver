@@ -1,20 +1,3 @@
-/***************************************************************************
- * 
- * Copyright (c) 2022 str2num.com, Inc. All Rights Reserved
- * $Id$ 
- * 
- **************************************************************************/
- 
- 
- 
-/**
- * @file event_loop.cpp
- * @author str2num
- * @version $Revision$ 
- * @brief 
- *  
- **/
-
 #include <ev.h>
 
 #include "base/event_loop.h"
@@ -46,6 +29,7 @@ void EventLoop::stop() {
     ev_break(_loop, EVBREAK_ALL);
 }
 
+//ev_now ·µ»ØµÄÊÇÃë
 unsigned long EventLoop::now() {
     return static_cast<unsigned long>(ev_now(_loop) * 1000000);
 }

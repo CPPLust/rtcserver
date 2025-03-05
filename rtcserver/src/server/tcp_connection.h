@@ -38,6 +38,7 @@ public:
     
     //当前读取的状态
     int current_state = STATE_HEAD;
+    //最后一次收取的时间
     unsigned long last_interaction = 0;
 };
 
