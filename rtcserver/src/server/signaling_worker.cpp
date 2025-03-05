@@ -242,7 +242,7 @@ void SignalingWorker::_read_query(int fd) {
 }
 void SignalingWorker::_close_conn(TcpConnection* c) {
     RTC_LOG(LS_INFO) << "close connection, fd: " << c->fd;
-    closesocket(c->fd);
+    close_socket(c->fd);
     _remove_conn(c);
 }
 
