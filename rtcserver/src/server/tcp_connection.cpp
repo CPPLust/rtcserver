@@ -12,7 +12,7 @@ namespace xrtc {
 	}
 
 TcpConnection::~TcpConnection() {
-
+    sdsfree(querybuf);
 }
 
 } // namespace xrtc

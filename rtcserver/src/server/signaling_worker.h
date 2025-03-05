@@ -3,9 +3,11 @@
 
 #include <thread>
 
+#include <rtc_base/slice.h>
 #include "base/lock_free_queue.h"
 #include "base/event_loop.h"
 #include "base/socket.h"
+#include "server/signaling_server.h"
 
 namespace xrtc {
 class TcpConnection;
@@ -17,7 +19,7 @@ public:
         NEW_CONN = 1
     };
 
-    SignalingWorker(int worker_id);
+    SignalingWorker(int worker_id, const SignalingServerOptions& options);
     ~SignalingWorker();
     
     int init();
@@ -31,14 +33,24 @@ public:
         int events, void *data);
 
     friend void conn_io_cb(EventLoop*, IOWatcher*, int fd, int events, void* data);
+    friend void conn_time_cb(EventLoop* el, TimerWatcher* /*w*/, void* data);
+
 private:
     void _process_notify(int msg);
     void _stop();
     void _new_conn(int fd);
     void _read_query(int fd);
+    int _process_query_buffer(TcpConnection* c);
+    int _process_request(TcpConnection* c, 
+            const rtc::Slice& header,
+            const rtc::Slice& body);
+    void _close_conn(TcpConnection* c);
+    void _remove_conn(TcpConnection* c);
+    void _process_timeout(TcpConnection* c);
 
 private:
     int _worker_id;
+    SignalingServerOptions _options;
     EventLoop* _el;
     IOWatcher* _pipe_watcher = nullptr;
     int _notify_recv_fd = -1;

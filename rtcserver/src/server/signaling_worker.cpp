@@ -34,13 +34,31 @@ void signaling_worker_recv_notify(EventLoop* el, IOWatcher* w, int fd,
     worker->_process_notify(msg);
 }
 
-SignalingWorker::SignalingWorker(int worker_id) :
+SignalingWorker::SignalingWorker(int worker_id, const SignalingServerOptions& options) :
     _worker_id(worker_id),
+    _options(options),
     _el(new EventLoop(this))
 {
 }
 
 SignalingWorker::~SignalingWorker() {
+ for (auto c : _conns) {
+        if (c) {
+            _close_conn(c);
+        }
+    }
+
+    _conns.clear();
+
+    if (_el) {
+        delete _el;
+        _el = nullptr;
+    }
+    
+    if (_thread) {
+        delete _thread;
+        _thread = nullptr;
+    }
 }
 
 int SignalingWorker::init() {
@@ -157,6 +175,18 @@ void conn_io_cb(EventLoop* /*el*/, IOWatcher* /*w*/, int fd, int events, void* d
         worker->_read_query(fd);
     }
 }
+void conn_time_cb(EventLoop* el, TimerWatcher* /*w*/, void* data) {
+    SignalingWorker* worker = (SignalingWorker*)(el->owner());
+    TcpConnection* c = (TcpConnection*)data;
+    worker->_process_timeout(c);
+}
+
+void SignalingWorker::_process_timeout(TcpConnection* c) {
+    if (_el->now() - c->last_interaction >= (unsigned long)_options.connection_timeout) {
+        RTC_LOG(LS_INFO) << "connection timeout, fd: " << c->fd; 
+        //_close_conn(c);
+    }
+}
 void SignalingWorker::_new_conn(int fd) {
     RTC_LOG(LS_INFO) << "signaling worker " << _worker_id << ", receive fd: " << fd;
     if (fd < 0) {
@@ -170,6 +200,12 @@ void SignalingWorker::_new_conn(int fd) {
     sock_peer_to_str(fd, c->ip, &(c->port));
     c->io_watcher = _el->create_io_event(conn_io_cb, this);
     _el->start_io_event(c->io_watcher, fd, EventLoop::READ);
+
+
+    c->timer_watcher = _el->create_timer(conn_time_cb, c, true);
+    _el->start_timer(c->timer_watcher, 100000); // 100ms
+    
+    c->last_interaction = _el->now();
     if ((size_t)fd >= _conns.size()) {
         _conns.resize(fd * 2, nullptr);
     }
@@ -189,14 +225,70 @@ void SignalingWorker::_read_query(int fd) {
     int qb_len = sdslen(c->querybuf);
     c->querybuf = sdsMakeRoomFor(c->querybuf, read_len);
     nread = sock_read_data(fd, c->querybuf + qb_len, read_len);
+    c->last_interaction = _el->now();
     RTC_LOG(LS_INFO) << "sock read data, len: " << nread;
     
     if (-1 == nread) {
-        //_close_conn(fd);
+        _close_conn(c);
         return;
     } else if (nread > 0) {
         sdsIncrLen(c->querybuf, nread);
     }
+    int ret = _process_query_buffer(c);
+    if (ret != 0) {
+        _close_conn(c);
+        return;
+    }
+}
+void SignalingWorker::_close_conn(TcpConnection* c) {
+    RTC_LOG(LS_INFO) << "close connection, fd: " << c->fd;
+    closesocket(c->fd);
+    _remove_conn(c);
+}
+
+void SignalingWorker::_remove_conn(TcpConnection* c) {
+    _el->delete_timer(c->timer_watcher);
+    _el->delete_io_event(c->io_watcher);
+    _conns[c->fd] = NULL;
+    delete c;
+}
+int SignalingWorker::_process_query_buffer(TcpConnection* c) {
+    while (sdslen(c->querybuf) >= c->bytes_processed + c->bytes_expected) {
+        xhead_t* head = (xhead_t*)(c->querybuf);
+        if (TcpConnection::STATE_HEAD == c->current_state) {
+            //读头
+            if (XHEAD_MAGIC_NUM != head->magic_num) {
+                RTC_LOG(LS_WARNING) << "invalid data, fd: " << c->fd;
+                return -1;
+            }
+
+            c->current_state = TcpConnection::STATE_BODY;
+            c->bytes_processed = XHEAD_SIZE;
+            c->bytes_expected = head->body_len;
+        } else {
+            //读数据体
+            rtc::Slice header(c->querybuf, XHEAD_SIZE); //固定36字节的大小
+            rtc::Slice body(c->querybuf + XHEAD_SIZE, head->body_len); //偏移36个字节的大小
+
+            int ret = _process_request(c, header, body);
+            if (ret != 0) {
+                return -1;
+            }
+
+            // 短连接处理   后面的数据就不处理了， 因为他们的是短链接的请求
+            //如果长链接，可能要改变状态
+            c->bytes_processed = 65535;
+        }
+    }
+
+    return 0;
+}
+int SignalingWorker::_process_request(TcpConnection* c,
+        const rtc::Slice& header,
+        const rtc::Slice& body)
+{
+    RTC_LOG(LS_INFO) << "receive body: " << body.data();
+    return 0;
 }
 int SignalingWorker::notify_new_conn(int fd) {
     _q_conn.produce(fd);
