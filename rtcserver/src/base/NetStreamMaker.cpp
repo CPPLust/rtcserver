@@ -13,7 +13,7 @@ CNetStreamMaker::CNetStreamMaker()
 
 CNetStreamMaker::~CNetStreamMaker()
 {
-    if (nullptr != m_pData)
+    if (NULL != m_pData)
     {
         free(m_pData);
         m_pData = NULL;
