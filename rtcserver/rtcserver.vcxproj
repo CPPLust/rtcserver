@@ -26,6 +26,7 @@
     <ClCompile Include="src\base\socket.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\server\rtc_server.cpp" />
+    <ClCompile Include="src\server\rtc_worker.cpp" />
     <ClCompile Include="src\server\signaling_server.cpp" />
     <ClCompile Include="src\server\signaling_worker.cpp" />
     <ClCompile Include="src\server\tcp_connection.cpp" />
@@ -39,6 +40,7 @@
     <ClInclude Include="src\base\socket.h" />
     <ClInclude Include="src\base\xhead.h" />
     <ClInclude Include="src\server\rtc_server.h" />
+    <ClInclude Include="src\server\rtc_worker.h" />
     <ClInclude Include="src\server\signaling_server.h" />
     <ClInclude Include="src\server\signaling_worker.h" />
     <ClInclude Include="src\server\tcp_connection.h" />
