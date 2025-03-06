@@ -23,6 +23,7 @@
     <ClCompile Include="src\base\event_loop.cpp" />
     <ClCompile Include="src\base\log.cpp" />
     <ClCompile Include="src\base\mypath.cpp" />
+    <ClCompile Include="src\base\NetStreamMaker.cpp" />
     <ClCompile Include="src\base\socket.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\server\rtc_server.cpp" />
@@ -37,6 +38,7 @@
     <ClInclude Include="src\base\lock_free_queue.h" />
     <ClInclude Include="src\base\log.h" />
     <ClInclude Include="src\base\mypath.h" />
+    <ClInclude Include="src\base\NetStreamMaker.h" />
     <ClInclude Include="src\base\socket.h" />
     <ClInclude Include="src\base\xhead.h" />
     <ClInclude Include="src\server\rtc_server.h" />

@@ -225,9 +225,12 @@ void SignalingWorker::_read_query(int fd) {
     TcpConnection* c = _conns[fd];
     int nread = 0;
     int read_len = c->bytes_expected;
-    int qb_len = sdslen(c->querybuf);
-    c->querybuf = sdsMakeRoomFor(c->querybuf, read_len);
-    nread = sock_read_data(fd, c->querybuf + qb_len, read_len);
+    //int qb_len = sdslen(c->querybuf);
+    int qb_len = c->querybuf->size();
+    //c->querybuf = sdsMakeRoomFor(c->querybuf, read_len);
+    c->querybuf->sdsMakeRoomFor(read_len);
+
+    nread = sock_read_data(fd, c->querybuf->get() + qb_len, read_len);
     c->last_interaction = _el->now();
     RTC_LOG(LS_INFO) << "sock read data, len: " << nread;
     
@@ -235,7 +238,8 @@ void SignalingWorker::_read_query(int fd) {
         _close_conn(c);
         return;
     } else if (nread > 0) {
-        sdsIncrLen(c->querybuf, nread);
+        //sdsIncrLen(c->querybuf, nread);
+        c->querybuf->sdsIncrLen(nread);
     }
     int ret = _process_query_buffer(c);
     if (ret != 0) {
@@ -256,7 +260,8 @@ void SignalingWorker::_remove_conn(TcpConnection* c) {
     delete c;
 }
 int SignalingWorker::_process_query_buffer(TcpConnection* c) {
-    while (sdslen(c->querybuf) >= c->bytes_processed + c->bytes_expected) {
+    //while (sdslen(c->querybuf) >= c->bytes_processed + c->bytes_expected) {
+    while (c->querybuf->size() >= c->bytes_processed + c->bytes_expected) {
         xhead_t* head = (xhead_t*)(c->querybuf);
         if (TcpConnection::STATE_HEAD == c->current_state) {
             //读头
@@ -270,8 +275,9 @@ int SignalingWorker::_process_query_buffer(TcpConnection* c) {
             c->bytes_expected = head->body_len;
         } else {
             //读数据体
-            rtc::Slice header(c->querybuf, XHEAD_SIZE); //固定36字节的大小
-            rtc::Slice body(c->querybuf + XHEAD_SIZE, head->body_len); //偏移36个字节的大小
+            rtc::Slice header(c->querybuf->get(), XHEAD_SIZE); //固定36字节的大小
+            rtc::Slice body(c->querybuf->get() + XHEAD_SIZE, head->body_len); //偏移36个字节的大小
+            c->querybuf->consume(XHEAD_SIZE + head->body_len);
 
             int ret = _process_request(c, header, body);
             if (ret != 0) {
