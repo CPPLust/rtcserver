@@ -1,4 +1,4 @@
-#ifndef  __TCP_CONNECTION_H_
+ï»¿#ifndef  __TCP_CONNECTION_H_
 #define  __TCP_CONNECTION_H_
 
 #if defined(_WIN32)
@@ -15,7 +15,7 @@ namespace xrtc {
 class TcpConnection {
 public:
     
-    //¶ÁÈ¡Êı¾İ°üµÄ×´Ì¬
+    //è¯»å–æ•°æ®åŒ…çš„çŠ¶æ€
     enum {
         STATE_HEAD = 0,
         STATE_BODY = 1
@@ -31,14 +31,14 @@ public:
     IOWatcher* io_watcher = nullptr;
     TimerWatcher* timer_watcher = nullptr;
     sds querybuf;
-    //µÚÒ»´Î¿ÉÄÜĞèÒª¶Á¸öÍ·,Ö®ºó³öÏÖÍ·²¿Êı¾İ²ÅÄÜÖªµÀÆÚÍûÖµ
+    //ç¬¬ä¸€æ¬¡å¯èƒ½éœ€è¦è¯»ä¸ªå¤´,ä¹‹åå‡ºç°å¤´éƒ¨æ•°æ®æ‰èƒ½çŸ¥é“æœŸæœ›å€¼
     size_t bytes_expected = XHEAD_SIZE;
-    //ÒÑ¾­´¦ÀíµÄÊı¾İ³¤¶È
+    //å·²ç»å¤„ç†çš„æ•°æ®é•¿åº¦
     size_t bytes_processed = 0;
     
-    //µ±Ç°¶ÁÈ¡µÄ×´Ì¬
+    //å½“å‰è¯»å–çš„çŠ¶æ€
     int current_state = STATE_HEAD;
-    //×îºóÒ»´ÎÊÕÈ¡µÄÊ±¼ä
+    //æœ€åä¸€æ¬¡æ”¶å–çš„æ—¶é—´
     unsigned long last_interaction = 0;
 };
 

@@ -104,7 +104,7 @@ int main() {
 	if (ret != 0) {
 		return -1;
 	}
-    // ???rtc server
+    // ³õÊ¼»¯rtc server
     ret = init_rtc_server();
     if (ret != 0) {
         return -1;
