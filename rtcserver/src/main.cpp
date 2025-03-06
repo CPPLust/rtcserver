@@ -6,10 +6,12 @@
 #include "base/socket.h"
 #include "server/signaling_server.h"
 #include <signal.h>
+#include "server/rtc_server.h"
 
 xrtc::GeneralConf* g_conf = nullptr;
 xrtc::XrtcLog* g_log = nullptr;
 xrtc::SignalingServer* g_signaling_server = nullptr;
+xrtc::RtcServer* g_rtc_server = nullptr;
 
 int init_general_conf(const char* filename) {
 	if (!filename) {
@@ -54,12 +56,24 @@ int init_signaling_server() {
 
 	return 0;
 }
+int init_rtc_server() {
+    g_rtc_server = new xrtc::RtcServer();
+	std::string conf_path = xrtc::get_bin_path() + MY_PATH_STRING + "conf/rtc_server.yaml";
+    int ret = g_rtc_server->init(conf_path.c_str());
+    if (ret != 0) {
+        return -1;
+    }
 
+    return 0;
+}
 static void process_signal(int sig) {
     RTC_LOG(LS_INFO) << "receive signal: " << sig;
     if (SIGINT == sig || SIGTERM == sig) {
         if (g_signaling_server) {
             g_signaling_server->stop();
+        }
+        if (g_rtc_server) {
+            g_rtc_server->stop();
         }
     }
 }
@@ -90,13 +104,19 @@ int main() {
 	if (ret != 0) {
 		return -1;
 	}
+    // ???rtc server
+    ret = init_rtc_server();
+    if (ret != 0) {
+        return -1;
+    }
     signal(SIGINT, process_signal);
     signal(SIGTERM, process_signal);
 
 	g_signaling_server->start();
+    g_rtc_server->start();
     g_signaling_server->join();
+    g_rtc_server->join();
 	
-	getchar();
 	return 0;
 }
 

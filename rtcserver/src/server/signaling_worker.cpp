@@ -4,7 +4,9 @@
 #include "xrtcserver_def.h"
 #include "server/signaling_worker.h"
 #include "server/tcp_connection.h"
+#include "server/rtc_server.h"
 
+extern xrtc::RtcServer* g_rtc_server;
 namespace xrtc {
 
 void signaling_worker_recv_notify(EventLoop* el, IOWatcher* w, int fd, 
@@ -348,8 +350,7 @@ int SignalingWorker::_process_push(int cmdno, TcpConnection* c,
     msg->audio = audio;
     msg->video = video;
     
-    //return g_rtc_server->send_rtc_msg(msg);
-    return 0;
+    return g_rtc_server->send_rtc_msg(msg);
 }
 int SignalingWorker::notify_new_conn(int fd) {
     _q_conn.produce(fd);

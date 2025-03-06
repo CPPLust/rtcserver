@@ -48,6 +48,9 @@
     <ClCompile Include="src\server\tcp_connection.cpp">
       <Filter>源文件\server</Filter>
     </ClCompile>
+    <ClCompile Include="src\server\rtc_server.cpp">
+      <Filter>源文件\server</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\base\conf.h">
@@ -79,6 +82,12 @@
     </ClInclude>
     <ClInclude Include="src\base\xhead.h">
       <Filter>源文件\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\xrtcserver_def.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\server\rtc_server.h">
+      <Filter>源文件\server</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

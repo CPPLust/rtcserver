@@ -2,11 +2,13 @@
 #ifndef  __XRTCSERVER_DEF_H_
 #define  __XRTCSERVER_DEF_H_
 
-#define CMDNO_PUSH     1
-#define CMDNO_PULL     2
-#define CMDNO_ANSWER   3
-#define CMDNO_STOPPUSH 4
-#define CMDNO_STOPPULL 5
+
+
+#define CMDNO_PUSH      1 // 开始推流
+#define CMDNO_PULL      2 // 开始拉流
+#define CMDNO_ANSWER    3 // 发送answer
+#define CMDNO_STOPPUSH 4 // 停止推流
+#define CMDNO_STOPPULL 5 // 停止拉流
 
 namespace xrtc {
 
