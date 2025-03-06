@@ -1,6 +1,7 @@
 
 #include <rtc_base/logging.h>
 
+#include "xrtcserver_def.h"
 #include "server/signaling_worker.h"
 #include "server/tcp_connection.h"
 
@@ -288,6 +289,66 @@ int SignalingWorker::_process_request(TcpConnection* c,
         const rtc::Slice& body)
 {
     RTC_LOG(LS_INFO) << "receive body: " << body.data();
+    xhead_t* xh = (xhead_t*)(header.data());
+    Json::CharReaderBuilder builder;
+    std::unique_ptr<Json::CharReader> reader(builder.newCharReader());
+    Json::Value root;
+    JSONCPP_STRING err;
+    reader->parse(body.data(), body.data() + body.size(), &root, &err);
+    if (!err.empty()) {
+        RTC_LOG(LS_WARNING) << "parse json body error: " << err << ", fd" << c->fd
+            << ", log_id: " << xh->log_id;
+        return -1;
+    }
+    int cmdno;
+    try {
+        cmdno = root["cmdno"].asInt();
+
+    } catch (Json::Exception e) {
+        RTC_LOG(LS_WARNING) << "no cmdno field in body, log_id: " << xh->log_id;
+        return -1;
+    }
+    
+    switch (cmdno) {
+        case CMDNO_PUSH:
+            return _process_push(cmdno, c, root, xh->log_id);
+        default:
+            break;
+    }
+    return 0;
+}
+int SignalingWorker::_process_push(int cmdno, TcpConnection* c,
+        const Json::Value& root, uint32_t log_id)
+{
+    uint64_t uid;
+    std::string stream_name;
+    int audio;
+    int video;
+    
+    try {
+        uid = root["uid"].asUInt64();
+        stream_name = root["stream_name"].asString();
+        audio = root["audio"].asInt();
+        video = root["video"].asInt();
+    } catch (Json::Exception e) {
+        RTC_LOG(LS_WARNING) << "parse json body error: " << e.what()
+            << "log_id: " << log_id;
+        return -1;
+    }
+    
+    RTC_LOG(LS_INFO) << "cmdno[" << cmdno << "] uid[" << uid 
+        << "] stream_name[" << stream_name 
+        << "] auido[" << audio 
+        << "] video[" << video << "] signaling server push request";
+    
+    std::shared_ptr<RtcMsg> msg = std::make_shared<RtcMsg>();
+    msg->cmdno = cmdno;
+    msg->uid = uid;
+    msg->stream_name = stream_name;
+    msg->audio = audio;
+    msg->video = video;
+    
+    //return g_rtc_server->send_rtc_msg(msg);
     return 0;
 }
 int SignalingWorker::notify_new_conn(int fd) {

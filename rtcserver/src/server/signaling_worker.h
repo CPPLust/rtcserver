@@ -4,6 +4,8 @@
 #include <thread>
 
 #include <rtc_base/slice.h>
+#include "jsoncpp/json.h"
+
 #include "base/lock_free_queue.h"
 #include "base/event_loop.h"
 #include "base/socket.h"
@@ -47,6 +49,8 @@ private:
     void _close_conn(TcpConnection* c);
     void _remove_conn(TcpConnection* c);
     void _process_timeout(TcpConnection* c);
+    int _process_push(int cmdno, TcpConnection* c,
+            const Json::Value& root, uint32_t log_id);
 
 private:
     int _worker_id;

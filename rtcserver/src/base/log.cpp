@@ -31,7 +31,7 @@ XrtcLog::~XrtcLog() {}
 void XrtcLog::OnLogMessage(const std::string& message, 
         rtc::LoggingSeverity severity)
 {
-    std::cout << "=======OnLogMessage: " << message; 
+    //std::cout << "=======OnLogMessage: " << message; 
 	if (severity >= rtc::LS_WARNING)
 	{
 		std::unique_lock<std::mutex> lock(_mtx_wf);
