@@ -262,7 +262,7 @@ void SignalingWorker::_remove_conn(TcpConnection* c) {
 int SignalingWorker::_process_query_buffer(TcpConnection* c) {
     //while (sdslen(c->querybuf) >= c->bytes_processed + c->bytes_expected) {
     while (c->querybuf->size() >= c->bytes_processed + c->bytes_expected) {
-        xhead_t* head = (xhead_t*)(c->querybuf);
+        xhead_t* head = (xhead_t*)(c->querybuf->get());
         if (TcpConnection::STATE_HEAD == c->current_state) {
             //¶ÁÍ·
             if (XHEAD_MAGIC_NUM != head->magic_num) {
