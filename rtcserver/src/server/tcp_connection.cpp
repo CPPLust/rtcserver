@@ -4,7 +4,7 @@
 namespace xrtc {
 
 	TcpConnection::TcpConnection(int fd) 
-    fd(fd),
+    :fd(fd),
     querybuf(sdsempty())
 	{
 		memset(ip, 0, 64);
