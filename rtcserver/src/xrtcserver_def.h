@@ -18,6 +18,11 @@ struct RtcMsg {
     std::string stream_name;
     int audio = 0;
     int video = 0;
+    uint32_t log_id = 0;
+    void* worker = nullptr;  //对应的要使用的signaling worker
+    void* conn = nullptr;    //哪个tcp的传输通道
+    std::string sdp;        //创建回填的offer sdp
+    int err_no = 0;          //如果有错误返回错误
 };
 
 } // namespace xrtc

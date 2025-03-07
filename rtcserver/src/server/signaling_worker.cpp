@@ -147,7 +147,25 @@ void SignalingWorker::_stop() {
     close_socket(_notify_send_fd);
 #endif
 }
+void SignalingWorker::_response_server_offer(std::shared_ptr<RtcMsg> msg) {
+    RTC_LOG(LS_WARNING) << "==========response server offer: " << msg->sdp;
+}
+void SignalingWorker::_process_rtc_msg() {
+    std::shared_ptr<RtcMsg> msg = pop_msg();
+    if (!msg) {
+        return;
+    }
 
+    switch (msg->cmdno) {
+        case CMDNO_PUSH:
+            _response_server_offer(msg);
+            break;
+        default:
+            RTC_LOG(LS_WARNING) << "unknown cmdno: " << msg->cmdno
+                << ", log_id: " << msg->log_id;
+            break;
+    }
+}
 void SignalingWorker::_process_notify(int msg) {
     switch (msg) {
         case QUIT:
@@ -158,6 +176,9 @@ void SignalingWorker::_process_notify(int msg) {
             if (_q_conn.consume(&fd)) {
                 _new_conn(fd);
             }
+            break;
+        case RTC_MSG:
+            _process_rtc_msg();
             break;
         default:
             RTC_LOG(LS_WARNING) << "unknown msg: " << msg;
@@ -350,7 +371,10 @@ int SignalingWorker::_process_push(int cmdno, TcpConnection* c,
     msg->stream_name = stream_name;
     msg->audio = audio;
     msg->video = video;
-    
+    msg->log_id = log_id;
+    msg->worker = this;
+    msg->conn = c;
+
     return g_rtc_server->send_rtc_msg(msg);
 }
 int SignalingWorker::notify_new_conn(int fd) {
@@ -358,6 +382,25 @@ int SignalingWorker::notify_new_conn(int fd) {
     return notify(SignalingWorker::NEW_CONN);
 }
 
+void SignalingWorker::push_msg(std::shared_ptr<RtcMsg> msg) {
+    std::unique_lock<std::mutex> lock(_q_msg_mtx);
+    _q_msg.push(msg);
+}
+
+std::shared_ptr<RtcMsg> SignalingWorker::pop_msg() {
+    std::unique_lock<std::mutex> lock(_q_msg_mtx);
+    if (_q_msg.empty()) {
+        return nullptr;
+    }
+
+    std::shared_ptr<RtcMsg> msg = _q_msg.front();
+    _q_msg.pop();
+    return msg;
+}
+int SignalingWorker::send_rtc_msg(std::shared_ptr<RtcMsg> msg) {
+    push_msg(msg);
+    return notify(RTC_MSG);
+}
 } // namespace xrtc
 
 

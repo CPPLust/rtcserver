@@ -3,6 +3,8 @@
 
 #include <thread>
 
+#include "xrtcserver_def.h"
+#include "base/lock_free_queue.h"
 #include "server/rtc_server.h"
 #include "base/socket.h"
 
@@ -23,6 +25,9 @@ public:
     void stop();
     int notify(int msg);
     void join();
+    void push_msg(std::shared_ptr<RtcMsg> msg);
+    bool pop_msg(std::shared_ptr<RtcMsg>* msg);
+    int send_rtc_msg(std::shared_ptr<RtcMsg> msg);
 
     friend void rtc_worker_recv_notify(EventLoop* /*el*/, IOWatcher* /*w*/, int fd, 
         int /*events*/, void* data);
@@ -30,6 +35,8 @@ public:
 private:
     void _process_notify(int msg);
     void _stop();
+    void _process_rtc_msg();
+    void _process_push(std::shared_ptr<RtcMsg> msg);
 
 private:
     RtcServerOptions _options;
@@ -42,6 +49,7 @@ private:
     struct  sockaddr_in notify_addr_in;
 
     std::thread* _thread = nullptr;
+    LockFreeQueue<std::shared_ptr<RtcMsg>> _q_msg;
 };
 
 } // namespace xrtc

@@ -43,6 +43,9 @@ private:
     void _process_rtc_msg();
     int _create_worker(int worker_id);
 
+    //该函数的主要目的是为了同一个流在相同的worker上, 这样拉流个推流都在一个worker上,好管理数据
+    RtcWorker* _get_worker(const std::string& stream_name);
+
 private:
     EventLoop* _el;
     RtcServerOptions _options;

@@ -1,5 +1,6 @@
 
 #include <rtc_base/logging.h>
+#include "server/signaling_worker.h"
 #include "server/rtc_worker.h"
 
 namespace xrtc {
@@ -132,6 +133,19 @@ void RtcWorker::join() {
     }
 }
 
+void RtcWorker::push_msg(std::shared_ptr<RtcMsg> msg) {
+    _q_msg.produce(msg);
+}
+
+bool RtcWorker::pop_msg(std::shared_ptr<RtcMsg>* msg) {
+    return _q_msg.consume(msg);
+}
+
+int RtcWorker::send_rtc_msg(std::shared_ptr<RtcMsg> msg) {
+    // 将消息投递到worker的队列
+    push_msg(msg);
+    return notify(RTC_MSG);
+}
 void RtcWorker::_stop() {
     if (!_thread) {
         RTC_LOG(LS_WARNING) << "rtc worker not running, worker_id: " << _worker_id;
@@ -150,11 +164,45 @@ void RtcWorker::_stop() {
 	close_socket(_notify_send_fd);
 #endif
 }
+void RtcWorker::_process_push(std::shared_ptr<RtcMsg> msg) {
+    std::string offer = "offer";
+    msg->sdp = offer;
 
+    SignalingWorker* worker = (SignalingWorker*)(msg->worker);
+    if (worker) {
+        worker->send_rtc_msg(msg);
+    }
+}
+
+void RtcWorker::_process_rtc_msg() {
+    std::shared_ptr<RtcMsg> msg;
+    if (!pop_msg(&msg)) {
+        return;
+    }
+
+    RTC_LOG(LS_INFO) << "cmdno[" << msg->cmdno << "] uid[" << msg->uid
+        << "] stream_name[" << msg->stream_name << "] audio[" << msg->audio
+        << "] video[" << msg->video << "] log_id[" << msg->log_id
+        << "] rtc worker receive msg, worker_id: " 
+        << _worker_id;
+
+    switch (msg->cmdno) {
+        case CMDNO_PUSH:
+            _process_push(msg);
+            break;
+        default:
+            RTC_LOG(LS_WARNING) << "unknown cmdno: " << msg->cmdno 
+                << ", log_id: " << msg->log_id;
+            break;
+    }
+}
 void RtcWorker::_process_notify(int msg) {
     switch (msg) {
         case QUIT:
             _stop();
+            break;
+        case RTC_MSG:
+            _process_rtc_msg();
             break;
         default:
             RTC_LOG(LS_WARNING) << "unknown msg: " << msg;

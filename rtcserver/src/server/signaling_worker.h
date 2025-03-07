@@ -2,10 +2,13 @@
 #define  __SIGNALING_WORKER_H_
 
 #include <thread>
+#include <queue>
+#include <mutex>
 
 #include <rtc_base/slice.h>
 #include "jsoncpp/json.h"
 
+#include "xrtcserver_def.h"
 #include "base/lock_free_queue.h"
 #include "base/event_loop.h"
 #include "base/socket.h"
@@ -18,7 +21,8 @@ class SignalingWorker {
 public:
     enum {
         QUIT = 0,
-        NEW_CONN = 1
+        NEW_CONN = 1,
+        RTC_MSG = 2
     };
 
     SignalingWorker(int worker_id, const SignalingServerOptions& options);
@@ -30,6 +34,9 @@ public:
     int notify(int msg);
     void join();
     int notify_new_conn(int fd);
+    void push_msg(std::shared_ptr<RtcMsg> msg);
+    std::shared_ptr<RtcMsg> pop_msg();
+    int send_rtc_msg(std::shared_ptr<RtcMsg> msg);
 
     friend void signaling_worker_recv_notify(EventLoop* el, IOWatcher* w, int fd, 
         int events, void *data);
@@ -51,6 +58,8 @@ private:
     void _process_timeout(TcpConnection* c);
     int _process_push(int cmdno, TcpConnection* c,
             const Json::Value& root, uint32_t log_id);
+    void _process_rtc_msg();
+    void _response_server_offer(std::shared_ptr<RtcMsg> msg);
 
 private:
     int _worker_id;
@@ -64,6 +73,8 @@ private:
     struct  sockaddr_in notify_addr_in;
 	LockFreeQueue<int> _q_conn;
     std::vector<TcpConnection*> _conns;
+    std::queue<std::shared_ptr<RtcMsg>> _q_msg;
+    std::mutex _q_msg_mtx;
 };
 
 } // namespace xrtc
