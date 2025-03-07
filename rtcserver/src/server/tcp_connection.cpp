@@ -13,6 +13,14 @@ namespace xrtc {
 
 TcpConnection::~TcpConnection() {
     sdsfree(querybuf);
+    //兜个底
+    while (!reply_list.empty()) {
+        rtc::Slice reply = reply_list.front();
+        free((void*)reply.data());
+        reply_list.pop_front();
+    }
+
+    reply_list.clear();
 }
 
 } // namespace xrtc
