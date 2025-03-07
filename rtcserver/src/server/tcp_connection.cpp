@@ -4,19 +4,15 @@
 namespace xrtc {
 
 	TcpConnection::TcpConnection(int fd) 
-			: fd(fd)
-			, querybuf(new CNetStreamMaker())
+    fd(fd),
+    querybuf(sdsempty())
 	{
 		memset(ip, 0, 64);
 		port = 0;
 	}
 
 TcpConnection::~TcpConnection() {
-	if (querybuf)
-	{
-		delete querybuf;
-		querybuf = NULL;
-	}
+    sdsfree(querybuf);
 }
 
 } // namespace xrtc

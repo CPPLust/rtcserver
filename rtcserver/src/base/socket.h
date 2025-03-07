@@ -39,12 +39,12 @@ class WinsockInitializer {
 
 #ifdef _WIN32
 typedef int socklen_t;
-#define close_socket(x) if (x != INVALID_SOCKET) {::closesocket(x); x = INVALID_SOCKET;}
+#define close_socket(x) if (x != INVALID_SOCKET) {::closesocket(x); /*x = INVALID_SOCKET*/;}
 #else
 #define SOCKET int
 #define INVALID_SOCKET -1
 #define SOCKET_ERROR            (-1)
-#define close_socket(x) if (x != INVALID_SOCKET) {::close(x); x = INVALID_SOCKET;}
+#define close_socket(x) if (x != INVALID_SOCKET) {::close(x); /*x = INVALID_SOCKET*/;}
 #endif
 
 int create_tcp_server(const char* addr, int port);

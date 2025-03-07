@@ -204,11 +204,11 @@ void SignalingWorker::_new_conn(int fd) {
     c->io_watcher = _el->create_io_event(conn_io_cb, this);
     _el->start_io_event(c->io_watcher, fd, EventLoop::READ);
 
-
+    c->last_interaction = _el->now();
     c->timer_watcher = _el->create_timer(conn_time_cb, c, true);
     _el->start_timer(c->timer_watcher, 100000); // 100ms
     
-    c->last_interaction = _el->now();
+   
     if ((size_t)fd >= _conns.size()) {
         _conns.resize(fd * 2, nullptr);
     }
@@ -225,12 +225,9 @@ void SignalingWorker::_read_query(int fd) {
     TcpConnection* c = _conns[fd];
     int nread = 0;
     int read_len = c->bytes_expected;
-    //int qb_len = sdslen(c->querybuf);
-    int qb_len = c->querybuf->size();
-    //c->querybuf = sdsMakeRoomFor(c->querybuf, read_len);
-    c->querybuf->sdsMakeRoomFor(read_len);
-
-    nread = sock_read_data(fd, c->querybuf->get() + qb_len, read_len);
+    int qb_len = sdslen(c->querybuf);
+    c->querybuf = sdsMakeRoomFor(c->querybuf, read_len);
+    nread = sock_read_data(fd, c->querybuf + qb_len, read_len);
     c->last_interaction = _el->now();
     RTC_LOG(LS_INFO) << "sock read data, len: " << nread;
     
@@ -238,8 +235,7 @@ void SignalingWorker::_read_query(int fd) {
         _close_conn(c);
         return;
     } else if (nread > 0) {
-        //sdsIncrLen(c->querybuf, nread);
-        c->querybuf->sdsIncrLen(nread);
+        sdsIncrLen(c->querybuf, nread);
     }
     int ret = _process_query_buffer(c);
     if (ret != 0) {
@@ -254,15 +250,15 @@ void SignalingWorker::_close_conn(TcpConnection* c) {
 }
 
 void SignalingWorker::_remove_conn(TcpConnection* c) {
+    RTC_LOG(LS_INFO) << "delete c: " << c;
     _el->delete_timer(c->timer_watcher);
     _el->delete_io_event(c->io_watcher);
     _conns[c->fd] = NULL;
     delete c;
 }
 int SignalingWorker::_process_query_buffer(TcpConnection* c) {
-    //while (sdslen(c->querybuf) >= c->bytes_processed + c->bytes_expected) {
-    while (c->querybuf->size() >= c->bytes_processed + c->bytes_expected) {
-        xhead_t* head = (xhead_t*)(c->querybuf->get());
+    while (sdslen(c->querybuf) >= c->bytes_processed + c->bytes_expected) {
+        xhead_t* head = (xhead_t*)(c->querybuf);
         if (TcpConnection::STATE_HEAD == c->current_state) {
             //读头
             if (XHEAD_MAGIC_NUM != head->magic_num) {
@@ -275,9 +271,8 @@ int SignalingWorker::_process_query_buffer(TcpConnection* c) {
             c->bytes_expected = head->body_len;
         } else {
             //读数据体
-            rtc::Slice header(c->querybuf->get(), XHEAD_SIZE); //固定36字节的大小
-            rtc::Slice body(c->querybuf->get() + XHEAD_SIZE, head->body_len); //偏移36个字节的大小
-            c->querybuf->consume(XHEAD_SIZE + head->body_len);
+            rtc::Slice header(c->querybuf, XHEAD_SIZE); //固定36字节的大小
+            rtc::Slice body(c->querybuf + XHEAD_SIZE, head->body_len); //偏移36个字节的大小
 
             int ret = _process_request(c, header, body);
             if (ret != 0) {

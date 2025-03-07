@@ -31,8 +31,8 @@ public:
     int port;
     IOWatcher* io_watcher = nullptr;
     TimerWatcher* timer_watcher = nullptr;
-    //sds querybuf;
-    CNetStreamMaker* querybuf;
+    sds querybuf;
+
     //第一次可能需要读个头,之后出现头部数据才能知道期望值
     size_t bytes_expected = XHEAD_SIZE;
     //已经处理的数据长度
