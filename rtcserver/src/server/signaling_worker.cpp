@@ -148,7 +148,57 @@ void SignalingWorker::_stop() {
 #endif
 }
 void SignalingWorker::_response_server_offer(std::shared_ptr<RtcMsg> msg) {
-    RTC_LOG(LS_WARNING) << "==========response server offer: " << msg->sdp;
+
+    //这段是判断合法性
+    TcpConnection* c = (TcpConnection*)(msg->conn);
+    if (!c) {
+        return;
+    }
+    int fd = msg->fd;
+    if (fd <= 0 || size_t(fd) >= _conns.size()) {
+        return;
+    }
+    
+    if (_conns[fd] != c) {
+        return;
+    }
+    // 构造响应头
+    xhead_t* xh = (xhead_t*)(c->querybuf);
+    rtc::Slice header(c->querybuf, XHEAD_SIZE);
+    char* buf = (char*)malloc(XHEAD_SIZE + MAX_RES_BUF);
+    if (!buf) {
+        RTC_LOG(LS_WARNING) << "zmalloc error, log_id: " << xh->log_id;
+        return;
+    }
+
+    memcpy(buf, header.data(), header.size());
+    xhead_t* res_xh = (xhead_t*)buf;
+
+    Json::Value res_root;
+    res_root["err_no"] = msg->err_no;
+    if (msg->err_no != 0) {
+        res_root["err_msg"] = "process error";
+        res_root["offer"] = "";
+    } else {
+        res_root["err_msg"] = "success";
+        res_root["offer"] = msg->sdp;
+    }
+
+    Json::StreamWriterBuilder write_builder;
+    write_builder.settings_["indentation"] = "";
+    std::string json_data = Json::writeString(write_builder, res_root);
+    RTC_LOG(LS_INFO) << "response body: " << json_data;
+
+    res_xh->body_len = json_data.size();
+    snprintf(buf + XHEAD_SIZE, MAX_RES_BUF, "%s", json_data.c_str());
+
+    //构建一个转发数据
+    rtc::Slice reply(buf, XHEAD_SIZE + res_xh->body_len);
+    _add_reply(c, reply);
+}
+void SignalingWorker::_add_reply(TcpConnection* c, const rtc::Slice& reply) {
+    c->reply_list.push_back(reply);
+    _el->start_io_event(c->io_watcher, c->fd, EventLoop::WRITE);
 }
 void SignalingWorker::_process_rtc_msg() {
     std::shared_ptr<RtcMsg> msg = pop_msg();
@@ -198,6 +248,9 @@ void conn_io_cb(EventLoop* /*el*/, IOWatcher* /*w*/, int fd, int events, void* d
     if (events & EventLoop::READ) {
         worker->_read_query(fd);
     }
+    if (events & EventLoop::WRITE) {
+        worker->_write_reply(fd);
+    }
 }
 void conn_time_cb(EventLoop* el, TimerWatcher* /*w*/, void* data) {
     SignalingWorker* worker = (SignalingWorker*)(el->owner());
@@ -205,6 +258,47 @@ void conn_time_cb(EventLoop* el, TimerWatcher* /*w*/, void* data) {
     worker->_process_timeout(c);
 }
 
+void SignalingWorker::_write_reply(int fd) {
+    if (fd <= 0 || (size_t)fd >= _conns.size()) {
+        return;
+    }
+
+    TcpConnection* c = _conns[fd];
+    if (!c) {
+        return;
+    }
+    
+    while (!c->reply_list.empty()) {
+        rtc::Slice reply = c->reply_list.front();
+        int nwritten = sock_write_data(c->fd, reply.data() + c->cur_resp_pos,
+                reply.size() - c->cur_resp_pos);
+        if (-1 == nwritten) {
+			c->reply_list.pop_front();
+			free((void*)reply.data());
+            _close_conn(c);
+            return;
+        } else if (0 == nwritten) {
+            RTC_LOG(LS_WARNING) << "write zero bytes, fd: " << c->fd
+                << ", worker_id: " << _worker_id;
+        } else if ((nwritten + c->cur_resp_pos) >= reply.size()) {
+            // 写入完成
+            c->reply_list.pop_front();
+            free((void*)reply.data());
+            c->cur_resp_pos = 0;
+            RTC_LOG(LS_INFO) << "write finished, fd: " << c->fd
+                << ", worker_id: " << _worker_id;
+        } else {
+            c->cur_resp_pos += nwritten;
+        }
+    }
+
+    c->last_interaction = _el->now();
+    if (c->reply_list.empty()) {
+        _el->stop_io_event(c->io_watcher, c->fd, EventLoop::WRITE);
+        RTC_LOG(LS_INFO) << "stop write event, fd: " << c->fd
+                << ", worker_id: " << _worker_id;
+    }
+}
 void SignalingWorker::_process_timeout(TcpConnection* c) {
     if (_el->now() - c->last_interaction >= (unsigned long)_options.connection_timeout) {
         RTC_LOG(LS_INFO) << "connection timeout timer, fd: " << c->fd; 
@@ -374,6 +468,7 @@ int SignalingWorker::_process_push(int cmdno, TcpConnection* c,
     msg->log_id = log_id;
     msg->worker = this;
     msg->conn = c;
+    msg->fd = c->fd;
 
     return g_rtc_server->send_rtc_msg(msg);
 }

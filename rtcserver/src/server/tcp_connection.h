@@ -10,6 +10,8 @@
 
 #include "base/xhead.h"
 #include "base/event_loop.h"
+#include <rtc_base/slice.h>
+#include <list>
 
 namespace xrtc {
 
@@ -42,6 +44,8 @@ public:
     int current_state = STATE_HEAD;
     //最后一次收取的时间
     unsigned long last_interaction = 0;
+    std::list<rtc::Slice> reply_list;
+    size_t cur_resp_pos = 0;
 };
 
 } // namespace xrtc

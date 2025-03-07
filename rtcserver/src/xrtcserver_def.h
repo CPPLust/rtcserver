@@ -10,6 +10,8 @@
 #define CMDNO_STOPPUSH 4 // 停止推流
 #define CMDNO_STOPPULL 5 // 停止拉流
 
+#define MAX_RES_BUF 4096
+
 namespace xrtc {
 
 struct RtcMsg {
@@ -21,6 +23,7 @@ struct RtcMsg {
     uint32_t log_id = 0;
     void* worker = nullptr;  //对应的要使用的signaling worker
     void* conn = nullptr;    //哪个tcp的传输通道
+    int fd = 0;              //它的目的就是回传时检查tcpconnection 和 conn一起考虑
     std::string sdp;        //创建回填的offer sdp
     int err_no = 0;          //如果有错误返回错误
 };

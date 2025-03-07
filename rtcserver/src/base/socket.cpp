@@ -308,6 +308,38 @@ int sock_read_data(int sock, char* buf, size_t len) {
     
     return nread;
 }
+
+int sock_write_data(int sock, const char* buf, size_t len) {
+#ifdef _WIN32
+	// Windows平台下的实现
+	int nwritten = send(sock, buf, static_cast<int>(len), 0);
+	if (nwritten == SOCKET_ERROR) {
+		int error_code = WSAGetLastError();
+		if (error_code == WSAEWOULDBLOCK) {
+			nwritten = 0;
+		}
+		else {
+			RTC_LOG(LS_WARNING) << "sock write failed on Windows, error: "
+				<< error_code << ", fd: " << sock;
+			return -1;
+		}
+	}
+#else
+	// POSIX兼容系统的实现
+	int nwritten = write(sock, buf, len);
+	if (-1 == nwritten) {
+		if (EAGAIN == errno || EWOULDBLOCK == errno) { // 在某些系统上，非阻塞操作可能会返回EWOULDBLOCK而不是EAGAIN
+			nwritten = 0;
+		}
+		else {
+			RTC_LOG(LS_WARNING) << "sock write failed, error: " << strerror(errno)
+				<< ", errno: " << errno << ", fd: " << sock;
+			return -1;
+		}
+	}
+#endif
+    return nwritten;
+}
 } // namespace xrtc
 
 

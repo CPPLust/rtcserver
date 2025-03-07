@@ -60,6 +60,8 @@ private:
             const Json::Value& root, uint32_t log_id);
     void _process_rtc_msg();
     void _response_server_offer(std::shared_ptr<RtcMsg> msg);
+    void _add_reply(TcpConnection* c, const rtc::Slice& reply);
+    void _write_reply(int fd);
 
 private:
     int _worker_id;

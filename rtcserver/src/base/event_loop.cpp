@@ -84,7 +84,8 @@ void EventLoop::start_io_event(IOWatcher* w, int fd, int mask) {
 void EventLoop::stop_io_event(IOWatcher* w, int fd, int mask) {
     struct ev_io* io = &(w->io);
     int active_events = TRANS_FROM_EV_MASK(io->events);
-    int events = active_events | ~mask;
+    //取消事件要用与   并取反
+    int events = active_events & ~mask;
 
     if (events == active_events) {
         return;
