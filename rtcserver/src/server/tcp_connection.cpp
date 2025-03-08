@@ -13,7 +13,7 @@ namespace xrtc {
 
 TcpConnection::~TcpConnection() {
     sdsfree(querybuf);
-    //兜个底
+    //兜个底  某些情况下可能没有释放
     while (!reply_list.empty()) {
         rtc::Slice reply = reply_list.front();
         free((void*)reply.data());

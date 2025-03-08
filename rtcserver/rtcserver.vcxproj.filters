@@ -19,6 +19,12 @@
     <Filter Include="源文件\server">
       <UniqueIdentifier>{f90d05f9-09f1-4380-88c6-7ca80cd4bb50}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\stream">
+      <UniqueIdentifier>{6d8b5dd1-c717-4bc5-955f-3a918fbfa73c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\pc">
+      <UniqueIdentifier>{a4b1eb68-d978-4a84-88fb-2a4be867489b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -56,6 +62,21 @@
     </ClCompile>
     <ClCompile Include="src\base\NetStreamMaker.cpp">
       <Filter>源文件\base</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stream\push_stream.cpp">
+      <Filter>源文件\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stream\rtc_stream.cpp">
+      <Filter>源文件\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="src\stream\rtc_stream_manager.cpp">
+      <Filter>源文件\stream</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pc\peer_connection.cpp">
+      <Filter>源文件\pc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pc\session_description.cpp">
+      <Filter>源文件\pc</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -100,6 +121,21 @@
     </ClInclude>
     <ClInclude Include="src\base\NetStreamMaker.h">
       <Filter>源文件\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stream\push_stream.h">
+      <Filter>源文件\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stream\rtc_stream.h">
+      <Filter>源文件\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stream\rtc_stream_manager.h">
+      <Filter>源文件\stream</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pc\peer_connection.h">
+      <Filter>源文件\pc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pc\session_description.h">
+      <Filter>源文件\pc</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -7,6 +7,7 @@
 #include "base/lock_free_queue.h"
 #include "server/rtc_server.h"
 #include "base/socket.h"
+#include "stream/rtc_stream_manager.h"
 
 namespace xrtc {
 
@@ -50,6 +51,7 @@ private:
 
     std::thread* _thread = nullptr;
     LockFreeQueue<std::shared_ptr<RtcMsg>> _q_msg;
+    std::unique_ptr<RtcStreamManager> _rtc_stream_mgr;
 };
 
 } // namespace xrtc
