@@ -15,7 +15,11 @@ PushStream::~PushStream() {
 }
 
 std::string PushStream::create_offer() {
-    return pc->create_offer();
+    RTCOfferAnswerOptions options;
+    options.recv_audio = audio;
+    options.recv_video = video;
+
+    return pc->create_offer(options);
 }
 
 } // namespace xrtc

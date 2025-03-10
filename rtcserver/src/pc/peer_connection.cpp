@@ -11,9 +11,30 @@ PeerConnection::~PeerConnection() {
 
 }
 
-std::string PeerConnection::create_offer() {
+std::string PeerConnection::create_offer(const RTCOfferAnswerOptions& options) {
     _local_desc = std::make_unique<SessionDescription>(SdpType::k_offer);
+    
+    if (options.recv_audio) {
+        auto audio = std::make_shared<AudioContentDescription>();
+        _local_desc->add_content(audio);
+    }
 
+    if (options.recv_video) {
+        auto video = std::make_shared<VideoContentDescription>();
+        _local_desc->add_content(video);
+    }
+    if (options.use_rtp_mux) {
+        ContentGroup offer_bundle("BUNDLE");
+        for (auto content : _local_desc->contents()) {
+            //为了给音视频都添加bundle机制
+            offer_bundle.add_content_name(content->mid());
+        }
+
+        //如果有添加条目， 要把条目设置给session description
+        if (!offer_bundle.content_names().empty()) {
+            _local_desc->add_group(offer_bundle);
+        }
+    }
     return _local_desc->to_string();
 }
 
