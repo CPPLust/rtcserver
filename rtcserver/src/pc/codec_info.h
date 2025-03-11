@@ -23,6 +23,7 @@ private:
     std::string _id;
     std::string _param;
 };
+typedef std::map<std::string, std::string> CodecParam;
 class CodecInfo {
 public:
     virtual AudioCodecInfo* as_audio() { return nullptr; }
@@ -33,6 +34,7 @@ public:
     std::string name; //Ãû×Ö
     int clockrate; //ÆµÂÊ
     std::vector<FeedbackParam> feedback_param;
+    CodecParam codec_param;
 };
 
 class AudioCodecInfo : public CodecInfo {
