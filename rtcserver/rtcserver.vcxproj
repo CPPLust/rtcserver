@@ -25,6 +25,8 @@
     <ClCompile Include="src\base\mypath.cpp" />
     <ClCompile Include="src\base\NetStreamMaker.cpp" />
     <ClCompile Include="src\base\socket.cpp" />
+    <ClCompile Include="src\ice\ice_credentials.cpp" />
+    <ClCompile Include="src\ice\ice_def.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\pc\peer_connection.cpp" />
     <ClCompile Include="src\pc\session_description.cpp" />
@@ -46,6 +48,8 @@
     <ClInclude Include="src\base\NetStreamMaker.h" />
     <ClInclude Include="src\base\socket.h" />
     <ClInclude Include="src\base\xhead.h" />
+    <ClInclude Include="src\ice\ice_credentials.h" />
+    <ClInclude Include="src\ice\ice_def.h" />
     <ClInclude Include="src\pc\codec_info.h" />
     <ClInclude Include="src\pc\peer_connection.h" />
     <ClInclude Include="src\pc\session_description.h" />
@@ -163,8 +167,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>yaml-cppd.lib;absl_base.lib;absl_strings.lib;absl_strerror.lib;absl_throw_delegate.lib;winmm.lib;ws2_32.lib;libuv.lib;Iphlpapi.lib;Userenv.lib;DbgHelp.lib;jsoncpp_static.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>../depend\win\debug\third_party\jsoncpp;../depend\win\debug\uv\lib;../depend\win\debug\absl\lib;../depend\win\debug\yaml\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>yaml-cppd.lib;absl_base.lib;absl_strings.lib;absl_strerror.lib;absl_throw_delegate.lib;winmm.lib;ws2_32.lib;libuv.lib;Iphlpapi.lib;Userenv.lib;DbgHelp.lib;jsoncpp_static.lib;libcrypto.lib;libssl.lib;Crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>../depend\win\debug\third_party\jsoncpp;../depend\win\debug\uv\lib;../depend\win\debug\absl\lib;../depend\win\debug\openssl\lib;../depend\win\debug\yaml\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

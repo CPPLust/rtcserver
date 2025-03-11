@@ -204,12 +204,12 @@ std::string SessionDescription::to_string() {
         ss << "c=IN IP4 0.0.0.0\r\n";
         ss << "a=rtcp:9 IN IP4 0.0.0.0\r\n";
         ss << "a=mid:" << content->mid() << "\r\n";
-        build_rtp_direction(content, ss);
+        build_rtp_direction(content, ss); //设置传输方向
 
-        if (content->rtcp_mux()) {
+        if (content->rtcp_mux()) { //设置rtp和rtcp是否用一个通道传输
             ss << "a=rtcp-mux\r\n";
         }
-        build_rtp_map(content, ss);
+        build_rtp_map(content, ss); //rtpmap 编码信息 比特率声道
     }
 
 

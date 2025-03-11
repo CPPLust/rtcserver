@@ -25,6 +25,9 @@
     <Filter Include="源文件\pc">
       <UniqueIdentifier>{a4b1eb68-d978-4a84-88fb-2a4be867489b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\ICE">
+      <UniqueIdentifier>{2830100b-442a-4945-b28f-2deeb2c6f91b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -77,6 +80,12 @@
     </ClCompile>
     <ClCompile Include="src\pc\session_description.cpp">
       <Filter>源文件\pc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ice\ice_credentials.cpp">
+      <Filter>源文件\ICE</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ice\ice_def.cpp">
+      <Filter>源文件\ICE</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -139,6 +148,12 @@
     </ClInclude>
     <ClInclude Include="src\pc\codec_info.h">
       <Filter>源文件\pc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ice\ice_credentials.h">
+      <Filter>源文件\ICE</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ice\ice_def.h">
+      <Filter>源文件\ICE</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
