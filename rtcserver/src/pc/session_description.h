@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 
+#include "ice/ice_credentials.h"
 #include "pc/codec_info.h"
 namespace xrtc {
 
@@ -70,6 +71,12 @@ private:
     std::string _semantics; //其实就是组的名字，要起个有意义一点的，它的语义
     std::vector<std::string> _content_names; //存了哪些名字
 };
+class TransportDescription {
+public:
+    std::string mid;
+    std::string ice_ufrag;
+    std::string ice_pwd;
+};
 class SessionDescription {
 public:
     SessionDescription(SdpType type);
@@ -82,6 +89,8 @@ public:
     }
     void add_group(const ContentGroup& group);
     std::vector<const ContentGroup*> get_group_by_name(const std::string& name) const;
+    bool add_transport_info(const std::string& mid, const IceParameters& ice_param);
+    std::shared_ptr<TransportDescription> get_transport_info(const std::string& mid);
 
     std::string to_string();
 
@@ -90,6 +99,7 @@ private:
     std::vector<std::shared_ptr<MediaContentDescription>> _contents;
 	//存了哪些组
     std::vector<ContentGroup> _content_groups;
+    std::vector<std::shared_ptr<TransportDescription>> _transport_infos;
 };
 
 } // namespace xrtc
