@@ -6,7 +6,9 @@
 
 namespace xrtc {
 
+//跟浏览器打交道必须加密
 const char k_media_protocol_dtls_savpf[] = "UDP/TLS/RTP/SAVPF";
+
 const char k_meida_protocol_savpf[] = "RTP/SAVPF";
 AudioContentDescription::AudioContentDescription() {
     //添加音频的编解码信息
@@ -15,6 +17,9 @@ AudioContentDescription::AudioContentDescription() {
     codec->name = "opus";
     codec->clockrate = 48000;
     codec->channels = 2;
+    //Transport-wide Congestion Control  传输拥塞控制
+    // add feedback param
+    codec->feedback_param.push_back(FeedbackParam("transport-cc"));
 
     _codecs.push_back(codec);
 }
@@ -25,6 +30,18 @@ VideoContentDescription::VideoContentDescription() {
     codec->clockrate = 90000;
     _codecs.push_back(codec);
 
+    // add feedback param
+    //基于接收端估计的最大比特率的反馈机制
+    codec->feedback_param.push_back(FeedbackParam("goog-remb"));
+    codec->feedback_param.push_back(FeedbackParam("transport-cc"));
+    //ccm Codec Control Message Fast Image Refresh  i帧请求
+    codec->feedback_param.push_back(FeedbackParam("ccm", "fir"));
+
+    codec->feedback_param.push_back(FeedbackParam("nack"));
+    //Picture Loss Indication
+    codec->feedback_param.push_back(FeedbackParam("nack", "pli"));
+    //fir 和 pli 的区别在于fir 必须发I帧， pli是告诉我丢了一些帧， 建议你发i帧
+	
     //重传包 一种新的类型
     auto rtx_codec = std::make_shared<VideoCodecInfo>();
     rtx_codec->id = 99;
@@ -73,6 +90,32 @@ std::vector<const ContentGroup*> SessionDescription::get_group_by_name(
 
     return content_groups;
 }
+static void add_rtcp_fb_line(std::shared_ptr<CodecInfo> codec,
+        std::stringstream& ss)
+{
+    for (auto param : codec->feedback_param) {
+        ss << "a=rtcp-fb:" << codec->id << " " << param.id();
+        if (!param.param().empty()) {
+            ss << " " << param.param();
+        }
+        ss << "\r\n";
+    }
+}
+static void build_rtp_map(std::shared_ptr<MediaContentDescription> content,
+        std::stringstream& ss)
+{
+    for (auto codec : content->get_codecs()) {
+        ss << "a=rtpmap:" << codec->id << " " << codec->name << "/" << codec->clockrate;
+        if (MediaType::MEDIA_TYPE_AUDIO == content->type()) {
+            auto audio_codec = codec->as_audio();
+            ss << "/" << audio_codec->channels;
+        }
+        ss << "\r\n";
+
+        add_rtcp_fb_line(codec, ss); //每个m行都要增加rtcp feedback， 也就是每个codec
+        //add_fmtp_line(codec, ss);
+    }
+}
 std::string SessionDescription::to_string() {
     std::stringstream ss;
     // version 这是版本
@@ -109,14 +152,21 @@ std::string SessionDescription::to_string() {
             fmt.append(" ");
             fmt.append(std::to_string(codec->id));
         }
-
+        //m=audio 9 UDP/TLS/RTP/SAVPF 111
+        //m=video 9 UDP/TLS/RTP/SAVPF 107 99
         ss << "m=" << content->mid() << " 9 " << k_media_protocol_dtls_savpf
             << fmt << "\r\n";
 
         ss << "c=IN IP4 0.0.0.0\r\n";
         ss << "a=rtcp:9 IN IP4 0.0.0.0\r\n";
 
+        build_rtp_map(content, ss);
     }
+
+
+
+
+
     return ss.str();
 }
 

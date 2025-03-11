@@ -2,23 +2,50 @@
 #define  __CODEC_INFO_H_
 
 #include <string>
+#include <vector>
+#include <map>
 
 namespace xrtc {
 
+class AudioCodecInfo;
+class VideoCodecInfo;
+
+class FeedbackParam {
+public:
+    FeedbackParam(const std::string& id, const std::string& param) :
+        _id(id), _param(param) {}
+    FeedbackParam(const std::string& id) : _id(id), _param("") {}
+
+    std::string id() { return _id; }
+    std::string param() { return _param; }
+
+private:
+    std::string _id;
+    std::string _param;
+};
 class CodecInfo {
+public:
+    virtual AudioCodecInfo* as_audio() { return nullptr; }
+    virtual VideoCodecInfo* as_video() { return nullptr; }
+
 public:
     int id; //id  webrtc pt  payload type id
     std::string name; //名字
     int clockrate; //频率
+    std::vector<FeedbackParam> feedback_param;
 };
 
 class AudioCodecInfo : public CodecInfo {
 public:
-    //音频独有的声道数
+    AudioCodecInfo* as_audio() override { return this; }
+
+public:
     int channels;
 };
 
 class VideoCodecInfo : public CodecInfo {
+public:
+    VideoCodecInfo* as_video() override { return this; }
 };
 
 } // namespace xrtc
