@@ -6,6 +6,32 @@
 
 namespace xrtc {
 
+const char k_media_protocol_dtls_savpf[] = "UDP/TLS/RTP/SAVPF";
+const char k_meida_protocol_savpf[] = "RTP/SAVPF";
+AudioContentDescription::AudioContentDescription() {
+    //添加音频的编解码信息
+    auto codec = std::make_shared<AudioCodecInfo>();
+    codec->id = 111;
+    codec->name = "opus";
+    codec->clockrate = 48000;
+    codec->channels = 2;
+
+    _codecs.push_back(codec);
+}
+VideoContentDescription::VideoContentDescription() {
+    auto codec = std::make_shared<VideoCodecInfo>();
+    codec->id = 107;
+    codec->name = "H264";
+    codec->clockrate = 90000;
+    _codecs.push_back(codec);
+
+    //重传包 一种新的类型
+    auto rtx_codec = std::make_shared<VideoCodecInfo>();
+    rtx_codec->id = 99;
+    rtx_codec->name = "rtx";
+    rtx_codec->clockrate = 90000;
+    _codecs.push_back(rtx_codec);
+}
 bool ContentGroup::has_content_name(const std::string& content_name) {
     for (auto name : _content_names) {
         if (name == content_name) {
@@ -73,10 +99,24 @@ std::string SessionDescription::to_string() {
         //最后追加一个\r\n
         ss << "\r\n";
     }
+    ss << "a=msid-semantic: WMS\r\n";
 
+    for (auto content : _contents) {
+        // RFC 4566
+        // m=<media> <port> <proto> <fmt>
+        std::string fmt;
+        for (auto codec : content->get_codecs()) {
+            fmt.append(" ");
+            fmt.append(std::to_string(codec->id));
+        }
 
+        ss << "m=" << content->mid() << " 9 " << k_media_protocol_dtls_savpf
+            << fmt << "\r\n";
 
+        ss << "c=IN IP4 0.0.0.0\r\n";
+        ss << "a=rtcp:9 IN IP4 0.0.0.0\r\n";
 
+    }
     return ss.str();
 }
 

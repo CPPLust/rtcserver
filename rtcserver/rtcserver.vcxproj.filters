@@ -137,5 +137,8 @@
     <ClInclude Include="src\pc\session_description.h">
       <Filter>源文件\pc</Filter>
     </ClInclude>
+    <ClInclude Include="src\pc\codec_info.h">
+      <Filter>源文件\pc</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
