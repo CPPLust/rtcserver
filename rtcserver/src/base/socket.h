@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #endif
+#include "rtc_base/logging.h"
 
 namespace xrtc {
 

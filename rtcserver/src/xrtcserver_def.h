@@ -12,6 +12,9 @@
 
 #define MAX_RES_BUF 4096
 
+#include <stdint.h>
+#include <string.h>
+
 namespace xrtc {
 
 struct RtcMsg {
@@ -26,6 +29,7 @@ struct RtcMsg {
     int fd = 0;              //它的目的就是回传时检查tcpconnection 和 conn一起考虑
     std::string sdp;        //创建回填的offer sdp
     int err_no = 0;          //如果有错误返回错误
+    void* certificate = nullptr;
 };
 
 } // namespace xrtc

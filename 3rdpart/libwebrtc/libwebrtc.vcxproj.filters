@@ -384,9 +384,6 @@
     <ClCompile Include="src\rtc_base\rtc_certificate.cc">
       <Filter>源文件\src\rtc_base</Filter>
     </ClCompile>
-    <ClCompile Include="src\rtc_base\rtc_certificate_generator.cc">
-      <Filter>源文件\src\rtc_base</Filter>
-    </ClCompile>
     <ClCompile Include="src\rtc_base\socket.cc">
       <Filter>源文件\src\rtc_base</Filter>
     </ClCompile>

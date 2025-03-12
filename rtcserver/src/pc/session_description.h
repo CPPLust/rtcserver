@@ -6,6 +6,8 @@
 #include <vector>
 #include <memory>
 
+#include <rtc_base/ssl_fingerprint.h>
+
 #include "ice/ice_credentials.h"
 #include "pc/codec_info.h"
 namespace xrtc {
@@ -76,6 +78,7 @@ public:
     std::string mid;
     std::string ice_ufrag;
     std::string ice_pwd;
+    std::unique_ptr<rtc::SSLFingerprint> identity_fingerprint;
 };
 class SessionDescription {
 public:
@@ -89,7 +92,9 @@ public:
     }
     void add_group(const ContentGroup& group);
     std::vector<const ContentGroup*> get_group_by_name(const std::string& name) const;
-    bool add_transport_info(const std::string& mid, const IceParameters& ice_param);
+    
+    bool add_transport_info(const std::string& mid, const IceParameters& ice_param,
+            rtc::RTCCertificate* certificate);
     std::shared_ptr<TransportDescription> get_transport_info(const std::string& mid);
 
     std::string to_string();

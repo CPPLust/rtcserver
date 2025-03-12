@@ -1,12 +1,18 @@
 
-#include <rtc_base/logging.h>
-#include <rtc_base/crc32.h>
+#include "server/rtc_server.h"
+#include "server/rtc_worker.h"
+
+
+#include "rtc_base/rtc_certificate_generator.h"
+#include "rtc_base/logging.h"
+#include "rtc_base/crc32.h"
+
 #include <yaml-cpp/yaml.h>
 
-#include "server/rtc_worker.h"
-#include "server/rtc_server.h"
 
 namespace xrtc {
+
+const uint64_t k_year_in_ms = 365 * 24 * 3600 * 1000L;
 
 void rtc_server_recv_notify(EventLoop* /*el*/, IOWatcher* /*w*/, 
         int fd, int /*events*/, void* data)
@@ -57,6 +63,24 @@ RtcServer::~RtcServer() {
     _workers.clear();
 }
 
+int RtcServer::_generate_and_check_certificate() {
+    if (!_certificate || _certificate->HasExpired(time(NULL) * 1000)) {
+        rtc::KeyParams key_params;
+        RTC_LOG(LS_INFO) << "dtls enabled, key type: " << key_params.type();
+        _certificate = rtc::RTCCertificateGenerator::GenerateCertificate(key_params,k_year_in_ms);
+      /*  if (_certificate) {
+            rtc::RTCCertificatePEM pem = _certificate->ToPEM();
+            RTC_LOG(LS_INFO) << "rtc certificate: \n" << pem.certificate();
+        }*/
+    }
+    
+    if (!_certificate) {
+        RTC_LOG(LS_WARNING) << "get certificate error";
+        return -1;
+    }
+
+    return 0;
+}
 int RtcServer::init(const char* conf_file) { 
     if (!conf_file) {
         RTC_LOG(LS_WARNING) << "conf_file is null";
@@ -72,6 +96,11 @@ int RtcServer::init(const char* conf_file) {
         RTC_LOG(LS_WARNING) << "rtc server load conf file error: " << e.msg;
         return -1;
     }
+	 // ????
+    if (_generate_and_check_certificate() != 0) {
+        return -1;
+    }
+	
 #if defined(_WIN32)
 	_notify_send_fd = create_udp_server("127.0.0.1", 19000);
 	if (_notify_send_fd < 0)
@@ -222,6 +251,11 @@ void RtcServer::_process_rtc_msg() {
     if (!msg) {
         return;
     }
+    if (_generate_and_check_certificate() != 0) {
+        return;
+    }
+    
+    msg->certificate = _certificate.get();
     RtcWorker* worker = _get_worker(msg->stream_name);
     if (worker) {
         worker->send_rtc_msg(msg);

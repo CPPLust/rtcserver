@@ -501,7 +501,6 @@
     <ClCompile Include="src\rtc_base\rate_statistics.cc" />
     <ClCompile Include="src\rtc_base\rate_tracker.cc" />
     <ClCompile Include="src\rtc_base\rtc_certificate.cc" />
-    <ClCompile Include="src\rtc_base\rtc_certificate_generator.cc" />
     <ClCompile Include="src\rtc_base\socket.cc" />
     <ClCompile Include="src\rtc_base\socket_address.cc" />
     <ClCompile Include="src\rtc_base\ssl_adapter.cc" />
