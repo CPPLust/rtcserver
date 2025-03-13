@@ -16,7 +16,10 @@ static RtpDirection get_direction(bool send, bool recv) {
         return RtpDirection::k_inactive;
     }
 }
-PeerConnection::PeerConnection(EventLoop* el) : _el(el) {
+PeerConnection::PeerConnection(EventLoop* el) : 
+    _el(el),
+    _transport_controller(new TransportController(el))
+{
 
 }
 
@@ -63,6 +66,7 @@ std::string PeerConnection::create_offer(const RTCOfferAnswerOptions& options) {
             _local_desc->add_group(offer_bundle);
         }
     }
+    _transport_controller->set_local_description(_local_desc.get());
     return _local_desc->to_string();
 }
 
