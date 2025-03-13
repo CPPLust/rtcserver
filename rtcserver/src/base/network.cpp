@@ -29,58 +29,22 @@ NetworkManager::~NetworkManager() {
 
 int NetworkManager::create_networks() {
 #ifdef _WIN32
-    ULONG outBufLen = 15000;
-    PIP_ADAPTER_ADDRESSES pAddresses = NULL;
-    DWORD dwRetVal;
 
-    do {
-        if (pAddresses)
-        {
-            free(pAddresses);
-            pAddresses = NULL;
-        }
-       
-        pAddresses = (PIP_ADAPTER_ADDRESSES)malloc(outBufLen);
-        if (pAddresses == NULL) {
-            RTC_LOG(LS_WARNING) << "Memory allocation failed for IP_ADAPTER_ADDRESSES struct\n";
-            return -1;
-        }
-        dwRetVal = GetAdaptersAddresses(AF_INET, GAA_FLAG_INCLUDE_PREFIX, NULL, pAddresses, &outBufLen);
-    } while (dwRetVal == ERROR_BUFFER_OVERFLOW);
-
-    if (dwRetVal != NO_ERROR) {
-        RTC_LOG(LS_WARNING) << "Call to GetAdaptersAddresses failed with error: " << dwRetVal << "\n";
-        free(pAddresses);
+    struct sockaddr_in sa;
+    sa.sin_family = AF_INET;
+    sa.sin_addr.s_addr = htonl(INADDR_ANY);
+    const char* addr = "10.10.13.10";
+    if (addr && inet_pton(AF_INET, addr, &sa.sin_addr) == 0) {
+        RTC_LOG(LS_WARNING) << "invalid address";;
         return -1;
     }
+    rtc::IPAddress ip_address(sa.sin_addr);
+    Network* network = new Network("wlan0", ip_address);
 
-    PIP_ADAPTER_ADDRESSES pCurrAddresses = pAddresses;
-    while (pCurrAddresses) {
-        PIP_ADAPTER_UNICAST_ADDRESS pUnicast = pCurrAddresses->FirstUnicastAddress;
-        while (pUnicast != NULL) {
-            SOCKADDR_IN* sockaddr_ipv4 = (SOCKADDR_IN*)pUnicast->Address.lpSockaddr;
-            rtc::IPAddress ip_address(sockaddr_ipv4->sin_addr.S_un.S_addr);
+    RTC_LOG(LS_INFO) << "gathered network interface: " << network->to_string();
 
-            if (rtc::IPIsPrivateNetwork(ip_address) || rtc::IPIsLoopback(ip_address)) {
-                continue;
-            }
-            //std::string networkname = std::string(pCurrAddresses->FriendlyName);
-            std::string networkname;
-            int size_needed = WideCharToMultiByte(CP_UTF8, 0, &pCurrAddresses->FriendlyName[0], -1, NULL, 0, NULL, NULL);
-            networkname.resize(size_needed - 1); // exclude null terminator
-            WideCharToMultiByte(CP_UTF8, 0, &pCurrAddresses->FriendlyName[0], -1, &networkname[0], size_needed, NULL, NULL);
+    _network_list.push_back(network);
 
-            Network* network = new Network(networkname, ip_address);
-
-            RTC_LOG(LS_INFO) << "gathered network interface: " << network->to_string();
-
-            _network_list.push_back(network);
-
-            pUnicast = pUnicast->Next;
-        }
-        pCurrAddresses = pCurrAddresses->Next;
-    }
-    free(pAddresses);
 #else
     struct ifaddrs* interface;
     int err = getifaddrs(&interface);

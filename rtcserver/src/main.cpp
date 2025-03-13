@@ -7,6 +7,7 @@
 #include "server/signaling_server.h"
 #include <signal.h>
 #include "server/rtc_server.h"
+#include "base/network.h"
 
 xrtc::GeneralConf* g_conf = nullptr;
 xrtc::XrtcLog* g_log = nullptr;
@@ -78,7 +79,7 @@ static void process_signal(int sig) {
     }
 }
 int main() {
-
+#if 1
 	std::string conf_path = xrtc::get_bin_path() + MY_PATH_STRING + "conf/general.yaml";
 	int ret = init_general_conf(conf_path.c_str());
 	if (ret != 0) {
@@ -116,7 +117,21 @@ int main() {
     g_rtc_server->start();
     g_signaling_server->join();
     g_rtc_server->join();
-	
+#else
+
+
+	xrtc::NetworkManager manager;
+
+	manager.create_networks();
+
+	const std::vector<xrtc::Network*>& l = manager.get_networks();
+
+	for (auto net : l)
+	{
+		printf("+++++++++++++++++++net %s\n", net->to_string().c_str());
+	}
+	getchar();
+#endif
 	return 0;
 }
 
