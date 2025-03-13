@@ -99,6 +99,9 @@
     <ClCompile Include="src\pc\transport_controller.cpp">
       <Filter>源文件\pc</Filter>
     </ClCompile>
+    <ClCompile Include="src\base\network.cpp">
+      <Filter>源文件\base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\base\conf.h">
@@ -178,6 +181,9 @@
     </ClInclude>
     <ClInclude Include="src\pc\transport_controller.h">
       <Filter>源文件\pc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\network.h">
+      <Filter>源文件\base</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
