@@ -73,12 +73,20 @@ private:
     std::string _semantics; //其实就是组的名字，要起个有意义一点的，它的语义
     std::vector<std::string> _content_names; //存了哪些名字
 };
+enum ConnectionRole {
+    NONE = 0,
+    ACTIVE,
+    PASSIVE,
+    ACTPASS,
+    HOLDCONN
+};
 class TransportDescription {
 public:
     std::string mid;
     std::string ice_ufrag;
     std::string ice_pwd;
     std::unique_ptr<rtc::SSLFingerprint> identity_fingerprint;
+    ConnectionRole connection_role = ConnectionRole::NONE;
 };
 class SessionDescription {
 public:
