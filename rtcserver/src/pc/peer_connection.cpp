@@ -16,9 +16,10 @@ static RtpDirection get_direction(bool send, bool recv) {
         return RtpDirection::k_inactive;
     }
 }
-PeerConnection::PeerConnection(EventLoop* el) : 
+
+PeerConnection::PeerConnection(EventLoop* el, PortAllocator* allocator) : 
     _el(el),
-    _transport_controller(new TransportController(el))
+    _transport_controller(new TransportController(el, allocator))
 {
 
 }

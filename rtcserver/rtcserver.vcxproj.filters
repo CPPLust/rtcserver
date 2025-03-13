@@ -102,6 +102,15 @@
     <ClCompile Include="src\base\network.cpp">
       <Filter>源文件\base</Filter>
     </ClCompile>
+    <ClCompile Include="src\ice\port_allocator.cpp">
+      <Filter>源文件\ICE</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ice\candidate.cpp">
+      <Filter>源文件\ICE</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ice\udp_port.cpp">
+      <Filter>源文件\ICE</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\base\conf.h">
@@ -184,6 +193,15 @@
     </ClInclude>
     <ClInclude Include="src\base\network.h">
       <Filter>源文件\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ice\port_allocator.h">
+      <Filter>源文件\ICE</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ice\candidate.h">
+      <Filter>源文件\ICE</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ice\udp_port.h">
+      <Filter>源文件\ICE</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

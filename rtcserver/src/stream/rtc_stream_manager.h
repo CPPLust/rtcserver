@@ -6,6 +6,7 @@
 
 #include <rtc_base/rtc_certificate.h>
 
+#include "ice/port_allocator.h"
 #include "base/event_loop.h"
 
 namespace xrtc {
@@ -30,6 +31,7 @@ public:
 private:
     EventLoop* _el;
     std::unordered_map<std::string, PushStream*> _push_streams;
+    std::unique_ptr<PortAllocator> _allocator;
 };
 
 } // namespace xrtc

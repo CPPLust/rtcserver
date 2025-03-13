@@ -25,7 +25,7 @@ struct RTCOfferAnswerOptions {
 };
 class PeerConnection {
 public:
-    PeerConnection(EventLoop* el);
+    PeerConnection(EventLoop* el, PortAllocator* allocator);
     ~PeerConnection();
     
     int init(rtc::RTCCertificate* certificate);

@@ -11,7 +11,7 @@ namespace xrtc {
 
 class IceAgent {
 public:
-    IceAgent(EventLoop* el);
+    IceAgent(EventLoop* el, PortAllocator* allocator);
     ~IceAgent();
     
     //创建channel的方法  transport_name 是针对video/audio
@@ -22,6 +22,9 @@ public:
     
     IceTransportChannel* get_channel(const std::string& transport_name,
             IceCandidateComponent component);
+    void set_ice_params(const std::string& transport_name,
+            IceCandidateComponent component,
+            const IceParameters& ice_params);
     void gathering_candidate();
 
 private:
@@ -33,6 +36,7 @@ private:
     EventLoop* _el;
     //所有的channel
     std::vector<IceTransportChannel*> _channels;
+    PortAllocator* _allocator;
 };
 
 } // namespace xrtc

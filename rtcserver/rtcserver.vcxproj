@@ -27,10 +27,13 @@
     <ClCompile Include="src\base\NetStreamMaker.cpp" />
     <ClCompile Include="src\base\network.cpp" />
     <ClCompile Include="src\base\socket.cpp" />
+    <ClCompile Include="src\ice\candidate.cpp" />
     <ClCompile Include="src\ice\ice_agent.cpp" />
     <ClCompile Include="src\ice\ice_credentials.cpp" />
     <ClCompile Include="src\ice\ice_def.cpp" />
     <ClCompile Include="src\ice\ice_transport_channel.cpp" />
+    <ClCompile Include="src\ice\port_allocator.cpp" />
+    <ClCompile Include="src\ice\udp_port.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\pc\peer_connection.cpp" />
     <ClCompile Include="src\pc\session_description.cpp" />
@@ -55,10 +58,13 @@
     <ClInclude Include="src\base\network.h" />
     <ClInclude Include="src\base\socket.h" />
     <ClInclude Include="src\base\xhead.h" />
+    <ClInclude Include="src\ice\candidate.h" />
     <ClInclude Include="src\ice\ice_agent.h" />
     <ClInclude Include="src\ice\ice_credentials.h" />
     <ClInclude Include="src\ice\ice_def.h" />
     <ClInclude Include="src\ice\ice_transport_channel.h" />
+    <ClInclude Include="src\ice\port_allocator.h" />
+    <ClInclude Include="src\ice\udp_port.h" />
     <ClInclude Include="src\pc\codec_info.h" />
     <ClInclude Include="src\pc\peer_connection.h" />
     <ClInclude Include="src\pc\session_description.h" />
