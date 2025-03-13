@@ -154,6 +154,34 @@ std::shared_ptr<TransportDescription> SessionDescription::get_transport_info(
 
     return nullptr;
 }
+bool SessionDescription::is_bundle(const std::string& mid) {
+    //查找当前是不是又bundle组
+    auto content_group = get_group_by_name("BUNDLE");
+    if (content_group.empty()) {
+        return false;
+    }
+
+    //有bundle组， 查找当前是不是有mid 即 video/audio
+    for (auto group : content_group) {
+        for (auto name : group->content_names()) {
+            if (name == mid) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+std::string SessionDescription::get_first_bundle_mid() {
+    auto content_group = get_group_by_name("BUNDLE");
+    if (content_group.empty()) {
+        return "";
+    }
+    
+    //简单的实现，这个可以改
+    return content_group[0]->content_names()[0];
+}
 static void add_rtcp_fb_line(std::shared_ptr<CodecInfo> codec,
         std::stringstream& ss)
 {
@@ -263,7 +291,7 @@ std::string SessionDescription::to_string() {
             if (fp) {
                 ss << "a=fingerprint:" << fp->algorithm << " " << fp->GetRfc4572Fingerprint()
                     << "\r\n";
-                ss << "a=setupp:" << connection_role_to_string(
+                ss << "a=setup:" << connection_role_to_string(
                         transport_info->connection_role) << "\r\n";
             }
         }
