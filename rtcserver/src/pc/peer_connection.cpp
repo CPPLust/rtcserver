@@ -44,7 +44,9 @@ void PeerConnection::on_candidate_allocate_done(TransportController* transport_c
     }
 
     auto content = _local_desc->get_content(transport_name);
-    content->add_candidates(candidates);
+    if (content) {
+        content->add_candidates(candidates);
+    }
 }
 int PeerConnection::init(rtc::RTCCertificate* certificate) {
     _certificate = certificate;

@@ -27,7 +27,7 @@ std::string Candidate::to_string() const {
     std::stringstream ss;
     ss << "Cand[" << foundation << ":" << (int)component << ":" << protocol
         << ":" << priority << ":" << address.ToString() << ":" << type
-        << ":" << username << ":" << password;
+        << ":" << username << ":" << password << "]";
     return ss.str();
 }
 } // namespace xrtc

@@ -48,7 +48,7 @@ VideoContentDescription::VideoContentDescription() {
 	// add codec param
     codec->codec_param["level-asymmetry-allowed"] = "1";
     codec->codec_param["packetization-mode"] = "1";
-    codec->codec_param["profile-level-id"] = "42e01";
+    codec->codec_param["profile-level-id"] = "42e01f";
 
     _codecs.push_back(codec);
 
