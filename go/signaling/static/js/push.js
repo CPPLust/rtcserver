@@ -9,6 +9,9 @@ var uid = $("#uid").val()
 var streamName = $("#streamName").val()
 var audio = $("#audio").val()
 var video = $("#video").val()
+var offer = "";
+var pc;
+const config = {};
 
 function startPush() {
 	console.log("send push:/signaling/push");
@@ -21,7 +24,8 @@ function startPush() {
 			if ("success" == textStatus && 0 == data.errNo) {
 				$("#tips1").html("<font color='blue'>推流请求成功!</font>")
 				console.log("remote answer: \r\n" + data.data.sdp)
-			//	pushStream(data.data);
+        offer = data.data;
+        pushStream();
 			} else {
 				$("#tips1").html("<font color='red'>推流请求失败!</font>")
 			}
@@ -30,8 +34,23 @@ function startPush() {
 	);
 }
 
+function pushStream() {
+    pc = new RTCPeerConnection(config);
+
+    pc.setRemoteDescription(offer).then(
+        setRemoteDescriptionSuccess,
+        setRemoteDescriptionError
+    );
+}
 
 
 
 
-
+function setRemoteDescriptionSuccess() {
+    console.log("pc set remote description success");
+    console.log("request screen share");
+    window.postMessage({type: "SS_UI_REQUEST", text: "push"}, "*");
+}
+function setRemoteDescriptionError(error) {
+    console.log("pc set remote description error: " + error);
+}
