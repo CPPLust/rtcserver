@@ -23,13 +23,19 @@ struct RTCOfferAnswerOptions {
     bool use_rtcp_mux = true;
     bool dtls_on = true;
 };
-class PeerConnection {
+class PeerConnection : public sigslot::has_slots<> {
 public:
     PeerConnection(EventLoop* el, PortAllocator* allocator);
     ~PeerConnection();
     
     int init(rtc::RTCCertificate* certificate);
     std::string create_offer(const RTCOfferAnswerOptions& options);
+
+private:
+    void on_candidate_allocate_done(TransportController* transport_controller,
+            const std::string& transport_name,
+            IceCandidateComponent component,
+            const std::vector<Candidate>& candidate);
 
 private:
     EventLoop* _el;
