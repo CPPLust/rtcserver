@@ -13,6 +13,7 @@ var offer = "";
 var pc;
 const config = {};
 var localStream;
+var lastConnectionState = "";
 
 function startPush() {
 	console.log("send push:/signaling/push");
@@ -24,7 +25,7 @@ function startPush() {
 			console.log("push response: " + JSON.stringify(data));
 			if ("success" == textStatus && 0 == data.errNo) {
 				$("#tips1").html("<font color='blue'>推流请求成功!</font>")
-				console.log("remote answer: \r\n" + data.data.sdp)
+                console.log("offer sdp: \n" + data.data.sdp);
         offer = data.data;
         pushStream();
 			} else {
@@ -35,8 +36,35 @@ function startPush() {
 	);
 }
 
+function sendAnswer(answerSdp) {
+    console.log("send answer: /signaling/sendanswer");
+
+    $.post("/signaling/sendanswer",
+        {"uid": uid, "streamName": streamName, "answer": answerSdp, "type": "push"},
+        function(data, textStatus) {
+            console.log("push response: " + JSON.stringify(data));
+            if ("success" == textStatus && 0 == data.errNo) {
+                $("#tips3").html("<font color='blue'>answer发送成功!</font>");
+            } else {
+                $("#tips3").html("<font color='red'>answer发送失败!</font>");
+            }
+        },
+        "json"
+    );
+}
 function pushStream() {
     pc = new RTCPeerConnection(config);
+    pc.oniceconnectionstatechange = function(e) {
+        var state = "";
+        if (lastConnectionState != "") {
+            state = lastConnectionState + "->" + pc.iceConnectionState;
+        } else {
+            state = pc.iceConnectionState;
+        }
+
+        $("#tips2").html("连接状态: " + state);
+        lastConnectionState = pc.iceConnectionState;
+    }
 
     pc.setRemoteDescription(offer).then(
         setRemoteDescriptionSuccess,
@@ -99,9 +127,21 @@ function setRemoteDescriptionSuccess() {
 }
 function createSessionDescriptionSuccess(answer) {
     console.log("answer sdp: \n" + answer.sdp);
+    console.log("pc set local sdp");
+    pc.setLocalDescription(answer).then(
+        setLocalDescriptionSuccess,
+        setLocalDescriptionError
+    );
+    sendAnswer(answer.sdp);
+}
+function setLocalDescriptionSuccess() {
+    console.log("set local description success");
 }
 function setRemoteDescriptionError(error) {
     console.log("pc set remote description error: " + error);
+}
+function setLocalDescriptionError(error) {
+    console.log("pc set local description error: " + error);
 }
 function createSessionDescriptionError(error) {
     console.log("pc create answer error: " + error);

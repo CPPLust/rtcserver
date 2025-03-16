@@ -50,20 +50,24 @@
 			video={{.video}}
 		</span>	
 	</div>
-	<span id="tips1"> </span>
-	<div>
-		<video id="localVideo" controls autoplay> </video>
-	</div>
-	<button id="pushBtn">开始推流</button>
-	<button id="stopPushBtn">停止推流</button>
+    <span id="tips1"></span> <br>
+    <span id="tips2"></span> <br>
+    <span id="tips3"></span>
+    
+    <div style="margin-top:5px">
+        <video id="localVideo" controls autoplay></video>
+    </div>
 
-	<input type="hidden" id="uid" value="{{.uid}}"> </input>
-	<input type="hidden" id="streamName" value="{{.streamName}}"> </input>
-	<input type="hidden" id="audio" value="{{.audio}}"> </input>
-	<input type="hidden" id="video" value="{{.video}}"> </input>
+    <button id="pushBtn">开始推流</button>
+    <button id="stopPushBtn">停止推流</button>
+    
+    <input type="hidden" id="uid" value="{{.uid}}"/>
+    <input type="hidden" id="streamName" value="{{.streamName}}"/>
+    <input type="hidden" id="audio" value="{{.audio}}"/>
+    <input type="hidden" id="video" value="{{.video}}"/>
 
-	<script src="/static/js/adapter.js"> </script>
-	<script src="/static/js/jquery-2.1.1.min.js"> </script>
+    <script src="/static/js/adapter.js"></script>
+    <script src="/static/js/jquery-2.1.1.min.js"></script>
 	<script src="/static/js/push.js"> </script>
 </body>
 
