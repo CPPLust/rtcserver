@@ -9,5 +9,7 @@ import (
 
 func init() {
 	framework.GActionRouter["/signaling/push"] = action.NewPushAction()
+	framework.GActionRouter["/signaling/sendanswer"] = action.NewSendAnswerAction()
+
 	framework.GActionRouter["/xrtcclient/push"] = action.NewXrtcClientPushAction()
 }
