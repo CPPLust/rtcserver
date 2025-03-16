@@ -25,6 +25,10 @@ public:
     void set_ice_params(const std::string& transport_name,
             IceCandidateComponent component,
             const IceParameters& ice_params);
+    void set_remote_ice_params(const std::string& transport_name,
+            IceCandidateComponent component,
+            const IceParameters& ice_params);
+
     void gathering_candidate();
     sigslot::signal4<IceAgent*, const std::string&, IceCandidateComponent,
         const std::vector<Candidate>&> signal_candidate_allocate_done;

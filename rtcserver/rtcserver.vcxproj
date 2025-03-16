@@ -19,7 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\3rdpart\libwebrtc\src\rtc_base\logging.cc" />
     <ClCompile Include="..\3rdpart\libwebrtc\src\rtc_base\rtc_certificate_generator.cc" />
+    <ClCompile Include="..\3rdpart\libwebrtc\src\rtc_base\string_encode.cc" />
     <ClCompile Include="src\base\conf.cpp" />
     <ClCompile Include="src\base\event_loop.cpp" />
     <ClCompile Include="src\base\log.cpp" />

@@ -472,7 +472,6 @@
     <ClCompile Include="src\rtc_base\internal\default_socket_server.cc" />
     <ClCompile Include="src\rtc_base\ip_address.cc" />
     <ClCompile Include="src\rtc_base\location.cc" />
-    <ClCompile Include="src\rtc_base\logging.cc" />
     <ClCompile Include="src\rtc_base\memory\aligned_malloc.cc" />
     <ClCompile Include="src\rtc_base\memory\fifo_buffer.cc" />
     <ClCompile Include="src\rtc_base\message_digest.cc" />
@@ -511,7 +510,6 @@
     <ClCompile Include="src\rtc_base\stream.cc" />
     <ClCompile Include="src\rtc_base\strings\json.cc" />
     <ClCompile Include="src\rtc_base\strings\string_builder.cc" />
-    <ClCompile Include="src\rtc_base\string_encode.cc" />
     <ClCompile Include="src\rtc_base\string_to_number.cc" />
     <ClCompile Include="src\rtc_base\string_utils.cc" />
     <ClCompile Include="src\rtc_base\synchronization\mutex.cc" />

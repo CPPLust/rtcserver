@@ -28,6 +28,12 @@
     <Filter Include="源文件\ICE">
       <UniqueIdentifier>{2830100b-442a-4945-b28f-2deeb2c6f91b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\libwebrtc">
+      <UniqueIdentifier>{afca59fc-4af4-46df-8c87-887e38c69d0f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\libwebrtc\rtc_base">
+      <UniqueIdentifier>{c92a51e6-4d44-4e48-b3f1-d57a3bc61f95}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -110,6 +116,12 @@
     </ClCompile>
     <ClCompile Include="src\ice\udp_port.cpp">
       <Filter>源文件\ICE</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdpart\libwebrtc\src\rtc_base\string_encode.cc">
+      <Filter>源文件\libwebrtc\rtc_base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\3rdpart\libwebrtc\src\rtc_base\logging.cc">
+      <Filter>源文件\libwebrtc\rtc_base</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
