@@ -1,4 +1,5 @@
 #include "stream/rtc_stream_manager.h"
+#include <rtc_base/logging.h>
 #include "base/conf.h"
 #include "stream/push_stream.h"
 #include "stream/rtc_stream_manager.h"
@@ -39,9 +40,37 @@ int RtcStreamManager::create_push_stream(uint64_t uid, const std::string& stream
             audio, video, log_id);
     stream->start(certificate);
     offer = stream->create_offer();
+    _push_streams[stream_name] = stream;
     return 0;
 }
 
+int RtcStreamManager::set_answer(uint64_t uid, const std::string& stream_name,
+        const std::string& answer, const std::string& stream_type, 
+        uint32_t log_id)
+{
+    if ("push" == stream_type) {
+        PushStream* push_stream = find_push_stream(stream_name);
+        if (!push_stream) {
+            RTC_LOG(LS_WARNING) << "push stream not found, uid: " << uid
+                << ", stream_name: " << stream_name
+                << ", log_id: " << log_id;
+            return -1;
+        }
+
+        if (uid != push_stream->uid) {
+            RTC_LOG(LS_WARNING) << "uid invalid, uid: " << uid
+                << ", stream_name: " << stream_name
+                << ", log_id: " << log_id;
+            return -1;
+        }
+        
+        push_stream->set_remote_sdp(answer);
+
+    } else if ("pull" == stream_type) {
+
+    }
+    return 0;
+}
 } // namespace xrtc
 
 
