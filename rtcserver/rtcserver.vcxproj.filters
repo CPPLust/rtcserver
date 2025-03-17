@@ -123,6 +123,9 @@
     <ClCompile Include="..\3rdpart\libwebrtc\src\rtc_base\logging.cc">
       <Filter>源文件\libwebrtc\rtc_base</Filter>
     </ClCompile>
+    <ClCompile Include="src\base\async_udp_socket.cpp">
+      <Filter>源文件\base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\base\conf.h">
@@ -214,6 +217,9 @@
     </ClInclude>
     <ClInclude Include="src\ice\udp_port.h">
       <Filter>源文件\ICE</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\async_udp_socket.h">
+      <Filter>源文件\base</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

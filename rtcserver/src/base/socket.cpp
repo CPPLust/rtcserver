@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <sys/socket.h>
 #include <netinet/tcp.h>
+#include <sys/ioctl.h>
 #endif
 
 namespace xrtc {
@@ -395,6 +396,62 @@ int sock_get_address(int sock, char* ip, int* port) {
 
     return 0;
 }
+int sock_recv_from(int sock, char* buf, size_t size, struct sockaddr* addr, 
+        socklen_t addr_len)
+{
+#if defined(_WIN32)
+    int received = recvfrom(sock, buf, size, 0, addr, &addr_len);
+    if (received < 0) {
+		int error_code = WSAGetLastError();
+		if (error_code == WSAEWOULDBLOCK) {
+			received = 0;
+        } else {
+            RTC_LOG(LS_WARNING) << "recv from error: " << strerror(errno) 
+                << ", errno: " << errno;
+            return -1;
+        }
+    } else if (0 == received) {
+        RTC_LOG(LS_WARNING) << "recv from error: " << strerror(errno) 
+            << ", errno: " << errno;
+        return -1;
+    }
+#else
+	int received = recvfrom(sock, buf, size, 0, addr, &addr_len);
+	if (received < 0) {
+		if (EAGAIN == errno) {
+			received = 0;
+		}
+		else {
+			RTC_LOG(LS_WARNING) << "recv from error: " << strerror(errno)
+				<< ", errno: " << errno;
+			return -1;
+		}
+	}
+	else if (0 == received) {
+		RTC_LOG(LS_WARNING) << "recv from error: " << strerror(errno)
+			<< ", errno: " << errno;
+		return -1;
+	}
+#endif
+
+    return received;
+}
+
+int64_t sock_get_recv_timestamp(int sock) {
+#if defined(_WIN32)
+    return -1;
+#else
+    struct timeval time;
+    int ret = ioctl(sock, SIOCGSTAMP, &time);
+    if (ret != 0) {
+        return -1;
+    }
+
+    return time.tv_sec * 1000000 + time.tv_usec;
+}
+#endif
+}
+
 } // namespace xrtc
 
 
