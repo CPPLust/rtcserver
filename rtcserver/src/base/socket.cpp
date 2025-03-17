@@ -448,7 +448,6 @@ int64_t sock_get_recv_timestamp(int sock) {
     }
 
     return time.tv_sec * 1000000 + time.tv_usec;
-}
 #endif
 }
 

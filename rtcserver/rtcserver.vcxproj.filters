@@ -126,6 +126,9 @@
     <ClCompile Include="src\base\async_udp_socket.cpp">
       <Filter>源文件\base</Filter>
     </ClCompile>
+    <ClCompile Include="src\ice\stun.cpp">
+      <Filter>源文件\ICE</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\base\conf.h">
@@ -220,6 +223,9 @@
     </ClInclude>
     <ClInclude Include="src\base\async_udp_socket.h">
       <Filter>源文件\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ice\stun.h">
+      <Filter>源文件\ICE</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

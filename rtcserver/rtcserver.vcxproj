@@ -36,6 +36,7 @@
     <ClCompile Include="src\ice\ice_def.cpp" />
     <ClCompile Include="src\ice\ice_transport_channel.cpp" />
     <ClCompile Include="src\ice\port_allocator.cpp" />
+    <ClCompile Include="src\ice\stun.cpp" />
     <ClCompile Include="src\ice\udp_port.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\pc\peer_connection.cpp" />
@@ -68,6 +69,7 @@
     <ClInclude Include="src\ice\ice_def.h" />
     <ClInclude Include="src\ice\ice_transport_channel.h" />
     <ClInclude Include="src\ice\port_allocator.h" />
+    <ClInclude Include="src\ice\stun.h" />
     <ClInclude Include="src\ice\udp_port.h" />
     <ClInclude Include="src\pc\codec_info.h" />
     <ClInclude Include="src\pc\peer_connection.h" />
