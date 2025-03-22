@@ -1,6 +1,7 @@
 #include <sstream>
 #include <rtc_base/logging.h>
 #include <rtc_base/crc32.h>
+#include <rtc_base/string_encode.h>
 
 #include "base/socket.h"
 #include "ice/udp_port.h"
@@ -83,26 +84,125 @@ void UDPPort::_on_read_packet(AsyncUdpSocket* socket, char* buf, size_t size,
         const rtc::SocketAddress& addr, int64_t ts)
 {
     std::unique_ptr<StunMessage> stun_msg;
-    bool res = get_stun_message(buf, size, &stun_msg);
+    std::string remote_ufrag;
+    bool res = get_stun_message(buf, size, addr, &stun_msg, &remote_ufrag);
+    if (!res || !stun_msg) {
+        return;
+    }
 
-    RTC_LOG(LS_WARNING) << "========res: " << res;
+    if (STUN_BINDING_REQUEST == stun_msg->type()) {
+        RTC_LOG(LS_INFO) << to_string() << ": Received "
+            << stun_method_to_string(stun_msg->type())
+            << " id=" << rtc::hex_encode(stun_msg->transaction_id())
+            << " from " << addr.ToString();
+        signal_unknown_address(this, addr, stun_msg.get(), remote_ufrag);
+    }
 }
 
-bool UDPPort::get_stun_message(const char* data, size_t len, 
-        std::unique_ptr<StunMessage>* out_msg)
+bool UDPPort::get_stun_message(const char* data, size_t len,
+        const rtc::SocketAddress& addr,
+        std::unique_ptr<StunMessage>* out_msg,
+        std::string* out_username)
 {
     if (!StunMessage::validate_fingerprint(data, len)) {
         return false;
     }
     
+    out_username->clear();
     std::unique_ptr<StunMessage> stun_msg = std::make_unique<StunMessage>();
     rtc::ByteBufferReader buf(data, len);
     if (!stun_msg->read(&buf) || buf.Length() != 0) {
         return false;
     }
+    if (STUN_BINDING_REQUEST == stun_msg->type()) {
+        if (!stun_msg->get_byte_string(STUN_ATTR_USERNAME) ||
+                !stun_msg->get_byte_string(STUN_ATTR_MESSAGE_INTEGRITY))
+        {
+            RTC_LOG(LS_WARNING) << to_string() << ": recevied "
+                << stun_method_to_string(stun_msg->type())
+                << " without username/M-I from "
+                << addr.ToString();
+            send_binding_error_response(stun_msg.get(), addr, STUN_ERROR_BAD_REQUEST,
+                    STUN_ERROR_REASON_BAD_REQUEST);
+            return true;
+        }
+        std::string local_ufrag;
+        std::string remote_ufrag;
+        if (!_parse_stun_username(stun_msg.get(), &local_ufrag, &remote_ufrag) ||
+                local_ufrag != _ice_params.ice_ufrag)
+        {
+            RTC_LOG(LS_WARNING) << to_string() << ": recevied "
+                << stun_method_to_string(stun_msg->type())
+                << " with bad local_ufrag: " << local_ufrag
+                << " from " << addr.ToString();
+            send_binding_error_response(stun_msg.get(), addr, STUN_ERROR_UNATHORIZED,
+                    STUN_ERROR_REASON_UNATHORIZED);
+            return true;
+        }
+
+        if (stun_msg->validate_message_integrity(_ice_params.ice_pwd) !=
+                StunMessage::IntegrityStatus::k_integrity_ok)
+        {
+            RTC_LOG(LS_WARNING) << to_string() << ": recevied "
+                << stun_method_to_string(stun_msg->type())
+                << " with bad M-I from "
+                << addr.ToString();
+            send_binding_error_response(stun_msg.get(), addr, STUN_ERROR_UNATHORIZED,
+                    STUN_ERROR_REASON_UNATHORIZED);
+            return true;
+        }
+
+        *out_username = remote_ufrag;
+    }
+    
+    *out_msg = std::move(stun_msg);
+    return true;
+}
+
+bool UDPPort::_parse_stun_username(StunMessage* stun_msg, std::string* local_ufrag,
+        std::string* remote_ufrag)
+{
+    local_ufrag->clear();
+    remote_ufrag->clear();
+
+    const StunByteStringAttribute* attr = stun_msg->get_byte_string(STUN_ATTR_USERNAME);
+    if (!attr) {
+        return false;
+    }
+
+    //RFRAG:LFRAG
+    std::string username = attr->get_string();
+    std::vector<std::string> fields;
+    rtc::split(username, ':', &fields);
+    if (fields.size() != 2) {
+        return false;
+    }
+
+    *local_ufrag = fields[0];
+    *remote_ufrag = fields[1];
+    
+    RTC_LOG(LS_WARNING) << "local_ufrag: " << *local_ufrag << ", remote_ufrag: " 
+        << *remote_ufrag;
 
     return true;
 }
+
+std::string UDPPort::to_string() {
+    std::stringstream ss;
+    ss << "Port[" << this << ":" << _transport_name << ":" << _component
+        << ":" << _ice_params.ice_ufrag << ":" << _ice_params.ice_pwd
+        << ":" << _local_addr.ToString() << "]";
+    return ss.str();
+}
+
+void UDPPort::send_binding_error_response(StunMessage* stun_msg,
+        const rtc::SocketAddress& addr,
+        int err_code,
+        const std::string& reason)
+{
+    //todo
+}
+
 } // namespace xrtc
 
 
