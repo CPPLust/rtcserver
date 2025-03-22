@@ -32,6 +32,7 @@
     <ClCompile Include="src\base\socket.cpp" />
     <ClCompile Include="src\ice\candidate.cpp" />
     <ClCompile Include="src\ice\ice_agent.cpp" />
+    <ClCompile Include="src\ice\ice_connection.cpp" />
     <ClCompile Include="src\ice\ice_credentials.cpp" />
     <ClCompile Include="src\ice\ice_def.cpp" />
     <ClCompile Include="src\ice\ice_transport_channel.cpp" />
@@ -65,6 +66,7 @@
     <ClInclude Include="src\base\xhead.h" />
     <ClInclude Include="src\ice\candidate.h" />
     <ClInclude Include="src\ice\ice_agent.h" />
+    <ClInclude Include="src\ice\ice_connection.h" />
     <ClInclude Include="src\ice\ice_credentials.h" />
     <ClInclude Include="src\ice\ice_def.h" />
     <ClInclude Include="src\ice\ice_transport_channel.h" />

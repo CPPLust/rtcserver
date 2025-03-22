@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 #include <rtc_base/socket_address.h>
 
@@ -15,6 +16,9 @@
 #include "ice/stun.h"
 
 namespace xrtc {
+class IceConnection;
+
+typedef std::map<rtc::SocketAddress, IceConnection*> AddressMap;
 
 class UDPPort : public sigslot::has_slots<> {
 public:
@@ -33,6 +37,7 @@ public:
             const rtc::SocketAddress& addr,
             int err_code,
             const std::string& reason);
+    IceConnection* create_connection(EventLoop* el, const Candidate& candidate);
 
     std::string to_string();
     
@@ -52,6 +57,7 @@ private:
     std::unique_ptr<AsyncUdpSocket> _async_socket;
     rtc::SocketAddress _local_addr;
     std::vector<Candidate> _candidates;
+    AddressMap _connections;
 };
 
 } // namespace xrtc

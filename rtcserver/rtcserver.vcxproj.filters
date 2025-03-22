@@ -129,6 +129,9 @@
     <ClCompile Include="src\ice\stun.cpp">
       <Filter>源文件\ICE</Filter>
     </ClCompile>
+    <ClCompile Include="src\ice\ice_connection.cpp">
+      <Filter>源文件\ICE</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\base\conf.h">
@@ -225,6 +228,9 @@
       <Filter>源文件\base</Filter>
     </ClInclude>
     <ClInclude Include="src\ice\stun.h">
+      <Filter>源文件\ICE</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ice\ice_connection.h">
       <Filter>源文件\ICE</Filter>
     </ClInclude>
   </ItemGroup>
