@@ -30,6 +30,7 @@ std::string compute_foundation(const std::string& type,
 {
     std::stringstream ss;
     ss << type << base.HostAsURIString() << protocol << relay_protocol;
+    RTC_LOG(LS_INFO) << "foundation=" << ss.str();
     return std::to_string(rtc::ComputeCrc32(ss.str()));
 }
 
@@ -81,9 +82,7 @@ int UDPPort::create_ice_candidate(Network* network, int min_port, int max_port,
     return 0;
 }
 
-IceConnection* UDPPort::create_connection(EventLoop* el, 
-        const Candidate& remote_candidate)
-{
+IceConnection* UDPPort::create_connection(const Candidate& remote_candidate) {
     IceConnection* conn = new IceConnection(_el, this, remote_candidate);
     auto ret = _connections.insert(
             std::make_pair(conn->remote_candidate().address, conn));
@@ -97,9 +96,17 @@ IceConnection* UDPPort::create_connection(EventLoop* el,
     return conn;
 }
 
+IceConnection* UDPPort::get_connection(const rtc::SocketAddress& addr) {
+    auto iter = _connections.find(addr);
+    return iter == _connections.end() ? nullptr : iter->second;
+}
 void UDPPort::_on_read_packet(AsyncUdpSocket* socket, char* buf, size_t size,
         const rtc::SocketAddress& addr, int64_t ts)
 {
+    if (IceConnection* conn = get_connection(addr)) {
+        conn->on_read_packet(buf, size, ts);
+        return;
+    }
     std::unique_ptr<StunMessage> stun_msg;
     std::string remote_ufrag;
     bool res = get_stun_message(buf, size, addr, &stun_msg, &remote_ufrag);

@@ -64,6 +64,7 @@ std::string PeerConnection::create_offer(const RTCOfferAnswerOptions& options) {
     if (options.recv_audio) {
         auto audio = std::make_shared<AudioContentDescription>();
         audio->set_direction(get_direction(options.send_audio, options.recv_audio));
+        //是否rtp和rtcp一个通道
         audio->set_rtcp_mux(options.use_rtcp_mux);
         _local_desc->add_content(audio);
         _local_desc->add_transport_info(audio->mid(), ice_param, _certificate);

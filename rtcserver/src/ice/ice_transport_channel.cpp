@@ -1,6 +1,7 @@
 #include <rtc_base/logging.h>
 #include "ice/udp_port.h"
 #include "ice/ice_transport_channel.h"
+#include "ice/ice_connection.h"
 
 namespace xrtc {
 
@@ -96,7 +97,7 @@ void IceTransportChannel::_on_unknown_address(UDPPort* port,
     RTC_LOG(LS_INFO) << to_string() << ": create peer reflexive candidate: "
         << remote_candidate.to_string();
 
-    IceConnection* conn = port->create_connection(_el, remote_candidate);
+    IceConnection* conn = port->create_connection(remote_candidate);
     if (!conn) {
         RTC_LOG(LS_WARNING) << to_string() << ": create connection from "
             << " peer reflexive candidate error, remote_addr: "
@@ -109,6 +110,8 @@ void IceTransportChannel::_on_unknown_address(UDPPort* port,
     RTC_LOG(LS_INFO) << to_string() << ": create connection from "
         << " peer reflexive candidate success, remote_addr: "
         << addr.ToString();
+
+    conn->handle_stun_binding_request(msg);
 }
 
 std::string IceTransportChannel::to_string() {

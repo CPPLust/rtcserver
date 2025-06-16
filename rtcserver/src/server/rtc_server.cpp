@@ -68,10 +68,10 @@ int RtcServer::_generate_and_check_certificate() {
         rtc::KeyParams key_params;
         RTC_LOG(LS_INFO) << "dtls enabled, key type: " << key_params.type();
         _certificate = rtc::RTCCertificateGenerator::GenerateCertificate(key_params,k_year_in_ms);
-      /*  if (_certificate) {
-            rtc::RTCCertificatePEM pem = _certificate->ToPEM();
-            RTC_LOG(LS_INFO) << "rtc certificate: \n" << pem.certificate();
-        }*/
+		if (_certificate) {
+			rtc::RTCCertificatePEM pem = _certificate->ToPEM();
+			RTC_LOG(LS_INFO) << "rtc certificate: \n" << pem.certificate();
+		}
     }
     
     if (!_certificate) {

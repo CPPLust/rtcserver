@@ -39,6 +39,24 @@ StunMessage::~StunMessage() = default;
     首先用STUN的头部+所有属性的内容（不包含FINGERPRINT自身），计算crc32的值
     FINGERPRINT value = crc32值 ^ 0x5354554e
 */
+
+/*
+* 
+* 
+*  0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|0 0|     STUN Message Type     |         Message Length        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                         Magic Cookie                          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
+|                     Transaction ID (96 bits)                  |
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+         
+            Figure 2: Format of STUN Message Header
+*/
 bool StunMessage::validate_fingerprint(const char* data, size_t len) {
 
     size_t fingerprint_attr_size = k_stun_attribute_header_size +StunUInt32Attribute::SIZE;
@@ -144,6 +162,24 @@ bool StunMessage::_validate_message_integrity_of_type(uint16_t mi_attr_type,
 
     return memcmp(data + mi_pos + k_stun_attribute_header_size, hmac, mi_attr_size)
         == 0;
+}
+bool StunMessage::add_message_integrity(const std::string& password) {
+    return true;
+}
+
+void StunMessage::add_fingerprint() {
+
+}
+
+void StunMessage::add_attribute(std::unique_ptr<StunAttribute> attr) {
+    size_t attr_len = attr->length();
+    if (attr_len % 4 != 0) {
+        attr_len += (4 - (attr_len % 4));
+    }
+
+    _length += attr_len;
+
+    _attrs.push_back(std::move(attr));
 }
 bool StunMessage::read(rtc::ByteBufferReader* buf) {
     const char* psrc = buf->Data();
@@ -312,6 +348,25 @@ void StunAttribute::consume_padding(rtc::ByteBufferReader* buf) {
     if (remain > 0) {
         buf->Consume(4 - remain);
     }
+}
+
+// Address
+StunAddressAttribute::StunAddressAttribute(uint16_t type, 
+        const rtc::SocketAddress& addr) :
+    StunAttribute(type, 0)
+{
+    //set_address(addr);
+}
+
+bool StunAddressAttribute::read(rtc::ByteBufferReader* buf) {
+    return true;
+}
+
+// Xor Address
+StunXorAddressAttribute::StunXorAddressAttribute(uint16_t type, 
+        const rtc::SocketAddress& addr) :
+    StunAddressAttribute(type, addr)
+{
 }
 
 // UInt32

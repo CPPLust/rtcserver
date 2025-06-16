@@ -28,7 +28,7 @@ type xrtcSendAnswerResp struct {
 	ErrMsg string `json:"err_msg"`
 }
 
-func (*sendAnswerAction) Execute(w http.ResponseWriter, cr *framework.ComRequest) {
+func (*sendAnswerAction) Excute(w http.ResponseWriter, cr *framework.ComRequest) {
 	r := cr.R
 
 	// uid
