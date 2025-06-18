@@ -484,7 +484,7 @@ int SignalingWorker::_process_push(int cmdno, TcpConnection* c,
         return -1;
     }
     
-    RTC_LOG(LS_INFO) << "cmdno[" << cmdno << "] uid[" << uid 
+    RTC_LOG(LS_INFO) << "process recv push cmdno[" << cmdno << "] uid[" << uid 
         << "] stream_name[" << stream_name 
         << "] auido[" << audio 
         << "] video[" << video << "] signaling server push request";

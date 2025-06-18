@@ -340,7 +340,7 @@ std::string SessionDescription::to_string() {
 
 
 
-
+    RTC_LOG(LS_INFO) << "SessionDescription to_string : " << ss.str();
 
     return ss.str();
 }

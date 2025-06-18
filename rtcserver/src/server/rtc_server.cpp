@@ -233,6 +233,7 @@ void RtcServer::_stop() {
 }
 
 int RtcServer::send_rtc_msg(std::shared_ptr<RtcMsg> msg) {
+    RTC_LOG(LS_INFO) << "++++++++ send_rtc_msg";
     push_msg(msg);
     return notify(RTC_MSG);
 }

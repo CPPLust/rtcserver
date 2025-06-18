@@ -173,7 +173,7 @@ void RtcWorker::_process_push(std::shared_ptr<RtcMsg> msg) {
             offer);
     
     
-    RTC_LOG(LS_INFO) << "offer: " << offer;
+    RTC_LOG(LS_INFO) << "create_push_stream ++++++++++++offer: " << offer;
     msg->sdp = offer;
 
     SignalingWorker* worker = (SignalingWorker*)(msg->worker);
@@ -200,7 +200,7 @@ void RtcWorker::_process_rtc_msg() {
         return;
     }
 
-    RTC_LOG(LS_INFO) << "cmdno[" << msg->cmdno << "] uid[" << msg->uid
+    RTC_LOG(LS_INFO) << "RtcWorker::_process_rtc_msg  cmdno[" << msg->cmdno << "] uid[" << msg->uid
         << "] stream_name[" << msg->stream_name << "] audio[" << msg->audio
         << "] video[" << msg->video << "] log_id[" << msg->log_id
         << "] rtc worker receive msg, worker_id: " 
