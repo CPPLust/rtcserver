@@ -4,7 +4,7 @@ if [ ! -d "./out" ];then
 fi
 
 cd out && cmake -DCMAKE_C_COMPILER=/opt/gcc-10.2/bin/gcc \
-      -DCMAKE_CXX_COMPILER=/opt/gcc-10.2/bin/g++  .. -DCMAKE_VERBOSE_MAKEFILE=ON
+      -DCMAKE_CXX_COMPILER=/opt/gcc-10.2/bin/g++  .. -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_BUILD_TYPE=Debug
 
 if test $# -gt 0 && test $1 = "clean"
 then

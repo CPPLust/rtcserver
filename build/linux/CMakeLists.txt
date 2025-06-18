@@ -11,6 +11,7 @@ message(${SRC_PATH})
 
 include_directories( ${SRC_PATH}/ 
 					 ${SRC_PATH}/base/
+	 				"${TOP_PATH}/depend/centos/third_party"
 	 				"${TOP_PATH}/depend/centos/third_party/libyuv/include"
     					"${TOP_PATH}/depend/centos/absl/include"
     					"${TOP_PATH}/depend/centos"
