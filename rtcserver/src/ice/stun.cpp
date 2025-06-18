@@ -1,4 +1,4 @@
-#include <rtc_base/byte_order.h>
+﻿#include <rtc_base/byte_order.h>
 #include <rtc_base/crc32.h>
 #include "rtc_base/logging.h"
 #include <rtc_base/message_digest.h>
@@ -59,19 +59,23 @@ StunMessage::~StunMessage() = default;
 */
 bool StunMessage::validate_fingerprint(const char* data, size_t len) {
 
-    size_t fingerprint_attr_size = k_stun_attribute_header_size +StunUInt32Attribute::SIZE;
+    size_t fingerprint_attr_size = k_stun_attribute_header_size +StunUInt32Attribute::SIZE; // t + l +v value 无符号32位
+    //len % 4 != 0 必须是4的倍数
     if (len % 4 != 0 || len < k_stun_header_size + fingerprint_attr_size) {
         return false;
     }
     
 
     const char* magic_cookie = data + k_stun_transaction_id_offset -k_stun_magic_cookie_length;
+    //大段， 无符号32位整数
     if (rtc::GetBE32(magic_cookie) != k_stun_magic_cookie) {
         return false;
     }
     
-
+    //当存在时，指纹属性必须是消息中的最后一个属性，因此将在消息完整性之后出现。
     const char* fingerprint_attr_data = data + len - fingerprint_attr_size;
+    //1 获取2个字节的类型
+    //2 获取2个字节的长度  记得要偏移
     if (rtc::GetBE16(fingerprint_attr_data) != STUN_ATTR_FINGERPRINT ||
             rtc::GetBE16(fingerprint_attr_data + sizeof(uint16_t)) !=
             StunUInt32Attribute::SIZE) 
@@ -82,6 +86,7 @@ bool StunMessage::validate_fingerprint(const char* data, size_t len) {
 
     uint32_t fingerprint = rtc::GetBE32(fingerprint_attr_data + k_stun_attribute_header_size);
 
+    //属性值计算为STUN消息的CRC-32，最多（但不包括）指纹属性本身，与32位值0x5354554e异或   减去fingerprint_attr_size
     return (fingerprint ^ STUN_FINGERPRINT_XOR_VALUE) ==rtc::ComputeCrc32(data, len - fingerprint_attr_size);
 }
 
@@ -164,11 +169,54 @@ bool StunMessage::_validate_message_integrity_of_type(uint16_t mi_attr_type,
         == 0;
 }
 bool StunMessage::add_message_integrity(const std::string& password) {
+    return _add_message_integrity_of_type(STUN_ATTR_MESSAGE_INTEGRITY,
+            k_stun_message_integrity_size, password.c_str(),
+            password.size());
+}
+
+bool StunMessage::_add_message_integrity_of_type(uint16_t attr_type,
+        uint16_t attr_size, const char* key, size_t key_len)
+{
+    auto mi_attr_ptr = std::make_unique<StunByteStringAttribute>(attr_type,
+            std::string(attr_size, '0'));
+    add_attribute(std::move(mi_attr_ptr));
+    
+    rtc::ByteBufferWriter buf;
+    if (!write(&buf)) {
+        return false;
+    }
+    
+    size_t msg_len_for_hmac = buf.Length() - k_stun_attribute_header_size -
+        mi_attr_ptr->length();
+    char hmac[k_stun_message_integrity_size];
+    size_t ret = rtc::ComputeHmac(rtc::DIGEST_SHA_1, key, key_len,
+            buf.Data(), msg_len_for_hmac, hmac, sizeof(hmac));
+    if (ret != sizeof(hmac)) {
+        RTC_LOG(LS_WARNING) << "compute hmac error";
+        return false;
+    }
+    
+    mi_attr_ptr->copy_bytes(hmac, k_stun_message_integrity_size);
+    _password.assign(key, key_len);
+    _integrity = IntegrityStatus::k_integrity_ok;
     return true;
 }
 
-void StunMessage::add_fingerprint() {
-
+bool StunMessage::add_fingerprint() {
+    auto fingerprint_attr_ptr = std::make_unique<StunUInt32Attribute>(
+            STUN_ATTR_FINGERPRINT, 0);
+    add_attribute(std::move(fingerprint_attr_ptr));
+    
+    rtc::ByteBufferWriter buf;
+    if (!write(&buf)) {
+        return false;
+    }
+    
+    size_t msg_len_for_crc32 = buf.Length() - k_stun_attribute_header_size -
+        fingerprint_attr_ptr->length();
+    uint32_t c = rtc::ComputeCrc32(buf.Data(), msg_len_for_crc32);
+    fingerprint_attr_ptr->set_value(c ^ STUN_FINGERPRINT_XOR_VALUE);
+    return true;
 }
 
 void StunMessage::add_attribute(std::unique_ptr<StunAttribute> attr) {
@@ -182,12 +230,14 @@ void StunMessage::add_attribute(std::unique_ptr<StunAttribute> attr) {
     _attrs.push_back(std::move(attr));
 }
 bool StunMessage::read(rtc::ByteBufferReader* buf) {
+	if (!buf) {
+		return false;
+	}
+
     const char* psrc = buf->Data();
     char a1 = *psrc;
     char a2 = *(psrc + 1);
-    if (!buf) {
-        return false;
-    }
+    
 	 _buffer.assign(buf->Data(), buf->Length());
     /*
 	          0                   1                   2                   3
@@ -241,18 +291,21 @@ bool StunMessage::read(rtc::ByteBufferReader* buf) {
     uint32_t magic_cookie_int;
     memcpy(&magic_cookie_int, magic_cookie.data(), sizeof(magic_cookie_int));
     if (rtc::NetworkToHost32(magic_cookie_int) != k_stun_magic_cookie) {
+        //认为是旧版本的stun transaction_id 是128位， 把transaction_id前面填充好
         transaction_id.insert(0, magic_cookie);
     }
     
     _transaction_id = transaction_id;
     
-    if (buf->Length() != _length) {
+    if (buf->Length() != _length) { //buf->Length()还剩余的，已经读取剩余的
         return false;
     }
     
     _attrs.resize(0);
 
     while (buf->Length() > 0) {
+        /// t L v
+
         uint16_t attr_type;
         uint16_t attr_length;
         if (!buf->ReadUInt16(&attr_type)) {
@@ -264,21 +317,45 @@ bool StunMessage::read(rtc::ByteBufferReader* buf) {
         }
         
         std::unique_ptr<StunAttribute> attr(
+                //工厂模式
                 _create_attribute(attr_type, attr_length));
         if (!attr) {
+            //这个属性可能我们不知道
             if (attr_length % 4 != 0) {
-                attr_length += (4 - (attr_length % 4));
+                attr_length += (4 - (attr_length % 4)); //(4 - (attr_length % 4)) 填充的数据
             }
 
-            if (!buf->Consume(attr_length)) {
+            if (!buf->Consume(attr_length)) { //buf内容要消费掉
                 return false;
             }
         } else {
+            //子类去读取属性value值
             if (!attr->read(buf)) {
                 return false;
             }
 
             _attrs.push_back(std::move(attr));
+        }
+    }
+
+    return true;
+}
+
+bool StunMessage::write(rtc::ByteBufferWriter* buf) const {
+    if (!buf) {
+        return false;
+    }
+
+    buf->WriteUInt16(_type);
+    buf->WriteUInt16(_length);
+    buf->WriteUInt32(k_stun_magic_cookie);
+    buf->WriteString(_transaction_id);
+    
+    for (const auto& attr : _attrs) {
+        buf->WriteUInt16(attr->type());
+        buf->WriteUInt16(attr->length());
+        if (!attr->write(buf)) {
+            return false;
         }
     }
 
@@ -335,18 +412,28 @@ StunAttribute* StunAttribute::create(StunAttributeValueType value_type,
         uint16_t type, uint16_t length, void* owner)
 {
     switch (value_type) {
-        case STUN_VALUE_BYTE_STRING:
+        case STUN_VALUE_BYTE_STRING: //value是一个串
             return new StunByteStringAttribute(type, length);
-        case STUN_VALUE_UINT32:
+		case STUN_VALUE_UINT32: //value是一个无符号32位整数
             return new StunUInt32Attribute(type);
         default:
             return nullptr;
     }
 }
 void StunAttribute::consume_padding(rtc::ByteBufferReader* buf) {
+    //判断是否是4字节对齐
     int remain = length() % 4;
+	//需要消费掉剩余的字节
     if (remain > 0) {
         buf->Consume(4 - remain);
+    }
+}
+
+void StunAttribute::write_padding(rtc::ByteBufferWriter* buf) {
+    int remain = length() % 4;
+    if (remain > 0) {
+        char zeroes[4] = {0};
+        buf->WriteBytes(zeroes, 4 - remain);
     }
 }
 
@@ -355,10 +442,66 @@ StunAddressAttribute::StunAddressAttribute(uint16_t type,
         const rtc::SocketAddress& addr) :
     StunAttribute(type, 0)
 {
-    //set_address(addr);
+    set_address(addr);
+}
+
+void StunAddressAttribute::set_address(const rtc::SocketAddress& addr) {
+    _address = addr;
+    
+    switch (family()) {
+        case STUN_ADDRESS_IPV4:
+            set_length(SIZE_IPV4);
+            break;
+        case STUN_ADDRESS_IPV6:
+            set_length(SIZE_IPV6);
+            break;
+        default:
+            set_length(SIZE_UNDEF);
+            break;
+    }
+}
+
+StunAddressFamily StunAddressAttribute::family() {
+    switch (_address.family()) {
+        case AF_INET:
+            return STUN_ADDRESS_IPV4;
+        case AF_INET6:
+            return STUN_ADDRESS_IPV6;
+        default:
+            return STUN_ADDRESS_UNDEF;
+    }
 }
 
 bool StunAddressAttribute::read(rtc::ByteBufferReader* buf) {
+    return true;
+}
+
+bool StunAddressAttribute::write(rtc::ByteBufferWriter* buf) {
+    StunAddressFamily stun_family = family();
+    if (STUN_ADDRESS_UNDEF == stun_family) {
+        RTC_LOG(LS_WARNING) << "write address attribute error: unknown family";
+        return false;
+    }
+
+    buf->WriteUInt8(0);
+    buf->WriteUInt8(stun_family);
+    buf->WriteUInt16(_address.port());
+
+    switch (_address.family()) {
+        case AF_INET: {
+            in_addr v4addr = _address.ipaddr().ipv4_address();
+            buf->WriteBytes((const char*)&v4addr, sizeof(v4addr));
+            break;
+        }
+        case AF_INET6: {
+            in6_addr v6addr = _address.ipaddr().ipv6_address();
+            buf->WriteBytes((const char*)&v6addr, sizeof(v6addr));
+            break;
+        }
+        default:
+            return false;
+    }
+
     return true;
 }
 
@@ -367,6 +510,56 @@ StunXorAddressAttribute::StunXorAddressAttribute(uint16_t type,
         const rtc::SocketAddress& addr) :
     StunAddressAttribute(type, addr)
 {
+}
+
+bool StunXorAddressAttribute::write(rtc::ByteBufferWriter* buf) {
+    StunAddressFamily stun_family = family();
+    if (STUN_ADDRESS_UNDEF == stun_family) {
+        RTC_LOG(LS_WARNING) << "write address attribute error: unknown family";
+        return false;
+    }
+    
+    rtc::IPAddress xored_ip = _get_xored_ip();
+    if (AF_UNSPEC == xored_ip.family()) {
+        return false;
+    }
+
+    buf->WriteUInt8(0);
+    buf->WriteUInt8(stun_family);
+    buf->WriteUInt16(_address.port() ^ (k_stun_magic_cookie >> 16));
+
+    switch (_address.family()) {
+        case AF_INET: {
+            in_addr v4addr = xored_ip.ipv4_address();
+            buf->WriteBytes((const char*)&v4addr, sizeof(v4addr));
+            break;
+        }
+        case AF_INET6: {
+            in6_addr v6addr = xored_ip.ipv6_address();
+            buf->WriteBytes((const char*)&v6addr, sizeof(v6addr));
+            break;
+        }
+        default:
+            return false;
+    }
+
+    return true;
+}
+
+rtc::IPAddress StunXorAddressAttribute::_get_xored_ip() {
+    rtc::IPAddress ip = _address.ipaddr();
+    switch (_address.family()) {
+        case AF_INET: {
+            in_addr v4addr = ip.ipv4_address();
+            v4addr.s_addr = (v4addr.s_addr ^ rtc::HostToNetwork32(k_stun_magic_cookie));
+            return rtc::IPAddress(v4addr);
+        }
+        case AF_INET6:
+            break;
+        default:
+            break;
+    }
+    return rtc::IPAddress();
 }
 
 // UInt32
@@ -383,10 +576,36 @@ bool StunUInt32Attribute::read(rtc::ByteBufferReader* buf) {
     return true;
 }
 
+bool StunUInt32Attribute::write(rtc::ByteBufferWriter* buf) {
+    buf->WriteUInt32(_bits);
+    return true;
+}
+
 // ByteString
 StunByteStringAttribute::StunByteStringAttribute(uint16_t type, uint16_t length) :
     StunAttribute(type, length) {}
     
+StunByteStringAttribute::StunByteStringAttribute(uint16_t type, const std::string& str) :
+    StunAttribute(type, 0)
+{
+    copy_bytes(str.c_str(), str.size());
+}
+
+void StunByteStringAttribute::copy_bytes(const char* bytes, size_t len) {
+    char* new_bytes = new char[len];
+    memcpy(new_bytes, bytes, len);
+    _set_bytes(new_bytes);
+    set_length(len);
+}
+
+void StunByteStringAttribute::_set_bytes(char* bytes) {
+    if (_bytes) {
+        delete[] _bytes;
+        _bytes = nullptr;
+    }
+    _bytes = bytes;
+}
+
 StunByteStringAttribute::~StunByteStringAttribute() {
     if (_bytes) {
         delete[] _bytes;
@@ -400,10 +619,19 @@ bool StunByteStringAttribute::read(rtc::ByteBufferReader* buf) {
         return false;
     }
 
+	//因为value是可变长度的，必须是4的倍数， 剩余的要消费掉
     consume_padding(buf);
 
+	//没有问题返回true
     return true;
 }
+
+bool StunByteStringAttribute::write(rtc::ByteBufferWriter* buf) {
+    buf->WriteBytes(_bytes, length());
+    write_padding(buf);
+    return true;
+}
+
 } // namespace xrtc
 
 

@@ -1,4 +1,4 @@
-#ifndef  __UDP_PORT_H_
+﻿#ifndef  __UDP_PORT_H_
 #define  __UDP_PORT_H_
 
 #include <string>
@@ -30,6 +30,11 @@ public:
     
     std::string ice_ufrag() { return _ice_params.ice_ufrag; }
     std::string ice_pwd() { return _ice_params.ice_pwd; }
+
+    const std::string& transport_name() { return _transport_name; }
+    IceCandidateComponent component() { return _component; }
+    const rtc::SocketAddress& local_addr() { return _local_addr; }
+
     int create_ice_candidate(Network* network, int min_port, int max_port, Candidate& c);
     bool get_stun_message(const char* data, size_t len,
             const rtc::SocketAddress& addr,
@@ -41,6 +46,8 @@ public:
             const std::string& reason);
     IceConnection* create_connection(const Candidate& candidate);
     IceConnection* get_connection(const rtc::SocketAddress& addr);
+    
+    int send_to(const char* buf, size_t len, const rtc::SocketAddress& addr);
 
     std::string to_string();
     

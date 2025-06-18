@@ -1,4 +1,4 @@
-#include <sstream>
+﻿#include <sstream>
 #include <rtc_base/logging.h>
 #include <rtc_base/crc32.h>
 #include <rtc_base/string_encode.h>
@@ -100,9 +100,19 @@ IceConnection* UDPPort::get_connection(const rtc::SocketAddress& addr) {
     auto iter = _connections.find(addr);
     return iter == _connections.end() ? nullptr : iter->second;
 }
+
+int UDPPort::send_to(const char* buf, size_t len, const rtc::SocketAddress& addr) {
+    if (!_async_socket) {
+        return -1;
+    }
+
+    return _async_socket->send_to(buf, len, addr);
+}
+
 void UDPPort::_on_read_packet(AsyncUdpSocket* socket, char* buf, size_t size,
         const rtc::SocketAddress& addr, int64_t ts)
-{
+{   //stun 3489 经典的stun 有缺陷
+    //stun 5389   session traversal utilitls for nat
     if (IceConnection* conn = get_connection(addr)) {
         conn->on_read_packet(buf, size, ts);
         return;

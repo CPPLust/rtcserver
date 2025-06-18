@@ -14,6 +14,9 @@ void async_udp_socket_io_cb(EventLoop* /*el*/, IOWatcher* /*w*/,
     if (EventLoop::READ & events) {
         udp_socket->recv_data();
     }
+    if (EventLoop::WRITE & events) {
+        udp_socket->send_data();
+    }
 }
 
 AsyncUdpSocket::AsyncUdpSocket(EventLoop* el, int socket) :
@@ -57,6 +60,29 @@ void AsyncUdpSocket::recv_data() {
     }
 }
 
+void AsyncUdpSocket::send_data() {
+    while (!_udp_packet_list.empty()) {
+        // ·¢ËÍudp packet
+    }
+
+    if (_udp_packet_list.empty()) {
+        _el->stop_io_event(_socket_watcher, _socket, EventLoop::WRITE);
+    }
+}
+
+int AsyncUdpSocket::send_to(const char* data, size_t size, const rtc::SocketAddress& addr) {
+    return _add_udp_packet(data, size, addr);
+}
+
+int AsyncUdpSocket::_add_udp_packet(const char* data, size_t size,
+        const rtc::SocketAddress& addr)
+{
+   UdpPacketData* packet_data = new UdpPacketData(data, size, addr);
+   _udp_packet_list.push_back(packet_data);
+   _el->start_io_event(_socket_watcher, _socket, EventLoop::WRITE);
+
+    return size;
+}
 } // namespace xrtc
 
 

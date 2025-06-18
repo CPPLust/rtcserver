@@ -1,4 +1,4 @@
-#ifndef  __ICE_CONNECTION_H_
+﻿#ifndef  __ICE_CONNECTION_H_
 #define  __ICE_CONNECTION_H_
 
 #include "base/event_loop.h"
@@ -18,7 +18,11 @@ public:
 
     void handle_stun_binding_request(StunMessage* stun_msg);
     void send_stun_binding_response(StunMessage* stun_msg); 
+    void send_response_message(const StunMessage& response);
     void on_read_packet(const char* buf, size_t len, int64_t ts);
+    
+    std::string to_string();
+
 private:
     EventLoop* _el;
     UDPPort* _port;
