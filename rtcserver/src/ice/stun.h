@@ -75,11 +75,12 @@ std::string stun_method_to_string(int type);
 
 class StunMessage {
 public:
+	//mi的状态， 就是消息完整性校验的状态
     enum class IntegrityStatus {
-        k_not_set,
-        k_no_integrity,
-        k_integrity_ok,
-        k_integrity_bad
+		k_not_set, //没有设置完整性
+		k_no_integrity, //没有完整性
+        k_integrity_ok,// 
+        k_integrity_bad// 完整性不对
     };
     StunMessage();
     ~StunMessage();

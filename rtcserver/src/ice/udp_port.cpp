@@ -162,6 +162,11 @@ bool UDPPort::get_stun_message(const char* data, size_t len,
         }
         std::string local_ufrag;
         std::string remote_ufrag;
+        /*
+		* ⚫ 如果STUN Binding Request用于连通性检查，必须使用短期认证机制
+               username由两部分构成，remote_ufrag:local_ufrag
+               password由peer提供
+        */
         if (!_parse_stun_username(stun_msg.get(), &local_ufrag, &remote_ufrag) ||
                 local_ufrag != _ice_params.ice_ufrag)
         {
@@ -205,6 +210,7 @@ bool UDPPort::_parse_stun_username(StunMessage* stun_msg, std::string* local_ufr
     }
 
     //RFRAG:LFRAG
+    //对于浏览器， RFRAG就是服务器的本地的
     std::string username = attr->get_string();
     std::vector<std::string> fields;
     rtc::split(username, ':', &fields);

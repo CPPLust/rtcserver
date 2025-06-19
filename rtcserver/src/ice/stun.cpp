@@ -94,6 +94,7 @@ StunMessage::IntegrityStatus StunMessage::validate_message_integrity(
         const std::string& password) 
 {
     _password = password;
+	//先检查是否有消息完整性属性
     if (get_byte_string(STUN_ATTR_MESSAGE_INTEGRITY)) {
         if (_validate_message_integrity_of_type(STUN_ATTR_MESSAGE_INTEGRITY,
                     k_stun_message_integrity_size,
@@ -127,6 +128,7 @@ bool StunMessage::_validate_message_integrity_of_type(uint16_t mi_attr_type,
     size_t current_pos = k_stun_header_size;
     bool has_message_integrity = false;
     while (current_pos + k_stun_attribute_header_size <= size) {
+        //T L V
         uint16_t attr_type;
         uint16_t attr_length;
         attr_type = rtc::GetBE16(&data[current_pos]);
@@ -137,11 +139,13 @@ bool StunMessage::_validate_message_integrity_of_type(uint16_t mi_attr_type,
         }
 
         current_pos += (k_stun_attribute_header_size + attr_length);
+        //判断是否有填充
         if (attr_length % 4 != 0) {
             current_pos += (4 - (attr_length % 4));
         }
     }
     
+    //没有message integrity
     if (!has_message_integrity) {
         return false;
     }
