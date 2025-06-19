@@ -12,8 +12,8 @@ priority = (2^24)*(type preference) +
 // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 // |  NIC Pref     |    Addr Pref  |
 // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-// NIC type£º3G/wifi
-// Addr pref: ¶¨ÒåÔÚRFC3484
+// NIC typeï¼š3G/wifi
+// Addr pref: å®šä¹‰åœ¨RFC3484
 uint32_t Candidate::get_priority(uint32_t type_preference,
         int network_adapter_preference,
         int relay_preference)

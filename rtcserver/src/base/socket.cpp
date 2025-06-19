@@ -450,7 +450,47 @@ int64_t sock_get_recv_timestamp(int sock) {
     return time.tv_sec * 1000000 + time.tv_usec;
 #endif
 }
+int sock_send_to(int sock, const char* buf, size_t len, int flag,struct sockaddr* addr, socklen_t addr_len)
+{
+#if defined(_WIN32)
+	int sent = sendto(sock, buf, len, flag, addr, addr_len);
+	if (sent < 0) {
 
+		int error_code = WSAGetLastError();
+		if (error_code == WSAEWOULDBLOCK) {
+            sent = 0;
+		}
+		else {
+            RTC_LOG(LS_WARNING) << "sendto error: "  << error_code;
+			return -1;
+		}
+	}
+	else if (0 == sent) {
+        int error_code = WSAGetLastError();
+        RTC_LOG(LS_WARNING) << "sendto error: " << error_code;
+		return -1;
+	}
+
+	return sent;
+
+#else
+    int sent = sendto(sock, buf, len, flag, addr, addr_len);
+    if (sent < 0) {
+        if (EAGAIN == errno) {
+            sent = 0;
+        } else {
+            RTC_LOG(LS_WARNING) << "sendto error: " << strerror(errno) << ", errno: " << errno;
+            return -1;
+        }
+    } else if (0 == sent) {
+        RTC_LOG(LS_WARNING) << "sendto error: " << strerror(errno) << ", errno: " << errno;
+        return -1;
+    }
+
+    return sent;
+#endif
+    return 0;
+}
 } // namespace xrtc
 
 

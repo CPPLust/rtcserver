@@ -36,9 +36,13 @@ public:
         signal_candidate_allocate_done;
 
 private:
+    //port udp port
+    //addr Ô¶¶ËµÄµØÖ·
+    //msg stunmessage
+    //remote_ufrag  Ô¶¶ËµÄuflag
     void _on_unknown_address(UDPPort* port,
-        const rtc::SocketAddress& addr,
-        StunMessage* msg,
+        const rtc::SocketAddress& addr, 
+        StunMessage* msg, 
         const std::string& remote_ufrag);
 
 private:

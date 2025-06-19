@@ -90,13 +90,14 @@ void IceTransportChannel::_on_unknown_address(UDPPort* port,
     remote_candidate.protocol = "udp";
     remote_candidate.address = addr;
     remote_candidate.username = remote_ufrag;
-    remote_candidate.password = _remote_ice_params.ice_pwd;
+    remote_candidate.password = _remote_ice_params.ice_pwd;  //这个是sdp交换过来的
     remote_candidate.priority = remote_priority;
     remote_candidate.type = PRFLX_PORT_TYPE;
 
     RTC_LOG(LS_INFO) << to_string() << ": create peer reflexive candidate: "
         << remote_candidate.to_string();
 
+    //这个conn 关联了本地的connection 和远端的connection
     IceConnection* conn = port->create_connection(remote_candidate);
     if (!conn) {
         RTC_LOG(LS_WARNING) << to_string() << ": create connection from "
@@ -107,6 +108,7 @@ void IceTransportChannel::_on_unknown_address(UDPPort* port,
         return;
     }
 
+    //对端的外网地址 也叫反射地址
     RTC_LOG(LS_INFO) << to_string() << ": create connection from "
         << " peer reflexive candidate success, remote_addr: "
         << addr.ToString();

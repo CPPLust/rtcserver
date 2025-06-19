@@ -20,7 +20,7 @@ const size_t k_stun_message_integrity_size = 20;
 
 enum StunMessageType {
     STUN_BINDING_REQUEST = 0x0001,
-    STUN_BINDING_RESPONSE = 0x1001,
+    STUN_BINDING_RESPONSE = 0x0101,
 };
 /*
 * Comprehension-required range (0x0000-0x7FFF):
@@ -45,6 +45,7 @@ enum StunAttributeType {
     STUN_ATTR_USERNAME = 0x0006,
     STUN_ATTR_MESSAGE_INTEGRITY = 0x0008,
     STUN_ATTR_XOR_MAPPED_ADDRESS = 0x0020,
+    //优先级
     STUN_ATTR_PRIORITY = 0x0024,
     STUN_ATTR_FINGERPRINT = 0x8028,
 };
@@ -54,6 +55,7 @@ enum StunAttributeValueType {
     STUN_VALUE_UINT32,
     STUN_VALUE_BYTE_STRING,
 };
+//stun错误码
 enum StunErrorCode {
     STUN_ERROR_BAD_REQUEST = 400,
     STUN_ERROR_UNATHORIZED = 401,
@@ -64,20 +66,23 @@ enum StunAddressFamily {
     STUN_ADDRESS_IPV4 = 1,
     STUN_ADDRESS_IPV6 = 2,
 };
+//错误的请求
 extern const char STUN_ERROR_REASON_BAD_REQUEST[];
+//没有授权
 extern const char STUN_ERROR_REASON_UNATHORIZED[];
 extern const char STUN_ERROR_REASON_SERVER_ERROR[];
 
 class StunAttribute;
 class StunUInt32Attribute;
 class StunByteStringAttribute;
+//类型转字符串
 std::string stun_method_to_string(int type);
 
 class StunMessage {
 public:
 	//mi的状态， 就是消息完整性校验的状态
     enum class IntegrityStatus {
-		k_not_set, //没有设置完整性
+		k_not_set, //状态就没有
 		k_no_integrity, //没有完整性
         k_integrity_ok,// 
         k_integrity_bad// 完整性不对
@@ -88,9 +93,11 @@ public:
     int type() const { return _type; }
     void set_type(uint16_t type) { _type = type; }
 
+    //获取长度
     size_t length() const { return _length; }
     void set_length(uint16_t length) { _length = length; }
 
+    //获取事务id
     const std::string& transaction_id() const { return _transaction_id; }
     void set_transaction_id(const std::string& transaction_id) {
         _transaction_id = transaction_id;
@@ -129,7 +136,7 @@ private:
 
     std::vector<std::unique_ptr<StunAttribute>> _attrs; //StunAttribute属性基类
 
-    IntegrityStatus _integrity = IntegrityStatus::k_not_set;
+	IntegrityStatus _integrity = IntegrityStatus::k_not_set; //检查消息完整性的状态
     std::string _password;
     std::string _buffer;
 };
@@ -191,6 +198,7 @@ private:
     rtc::IPAddress _get_xored_ip();
 };
 
+//value是一个无符号的32位的数据
 class StunUInt32Attribute : public StunAttribute {
 public:
     static const size_t SIZE = 4;

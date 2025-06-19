@@ -25,7 +25,9 @@ public:
 
 private:
     EventLoop* _el;
+    //当前使用的udp port
     UDPPort* _port;
+    //构建的peer 反射地址， 就是它的外网地址
     Candidate _remote_candidate;
 };
 

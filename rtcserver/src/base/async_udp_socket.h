@@ -1,4 +1,4 @@
-#ifndef  __ASYNC_UDP_SOCKET_H_
+﻿#ifndef  __ASYNC_UDP_SOCKET_H_
 #define  __ASYNC_UDP_SOCKET_H_
 
 #include <list>
@@ -26,6 +26,10 @@ public:
             _data = nullptr;
         }
     }
+    
+    char* data() { return _data; }
+    size_t size() { return _size; }
+    const rtc::SocketAddress& addr() { return _addr; }
 
 private:
     char* _data;

@@ -84,8 +84,13 @@ int UDPPort::create_ice_candidate(Network* network, int min_port, int max_port,
 
 IceConnection* UDPPort::create_connection(const Candidate& remote_candidate) {
     IceConnection* conn = new IceConnection(_el, this, remote_candidate);
+    //d
     auto ret = _connections.insert(
             std::make_pair(conn->remote_candidate().address, conn));
+    //此方法返回一个 std::pair<iterator, bool>，
+    // 其中 iterator 是指向插入元素的迭代器（如果插入失败，则指向阻止插入的元素）
+    // 而 bool 值表示插入是否成功
+    //之前的connection要删除？
     if (ret.second == false && ret.first->second != conn) {
         RTC_LOG(LS_WARNING) << to_string() << ": create ice connection on "
             << "an existing remote address, addr: " 
@@ -129,6 +134,7 @@ void UDPPort::_on_read_packet(AsyncUdpSocket* socket, char* buf, size_t size,
             << stun_method_to_string(stun_msg->type())
             << " id=" << rtc::hex_encode(stun_msg->transaction_id())
             << " from " << addr.ToString();
+        //因为这个之前服务器不知道客户端的candidate， 这是第一次交换
         signal_unknown_address(this, addr, stun_msg.get(), remote_ufrag);
     }
 }

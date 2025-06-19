@@ -18,6 +18,8 @@
 namespace xrtc {
 class IceConnection;
 
+//rtc::SocketAddress 远程的地址
+//IceConnection 绑定的connection
 typedef std::map<rtc::SocketAddress, IceConnection*> AddressMap;
 
 class UDPPort : public sigslot::has_slots<> {
@@ -40,6 +42,7 @@ public:
             const rtc::SocketAddress& addr,
             std::unique_ptr<StunMessage>* out_msg,
             std::string* out_username);
+    //出现错误时发送回复
     void send_binding_error_response(StunMessage* stun_msg,
             const rtc::SocketAddress& addr,
             int err_code,
@@ -61,12 +64,15 @@ private:
 private:
     EventLoop* _el;
     std::string _transport_name;
+    //rtcp还是rtp
     IceCandidateComponent _component;
     IceParameters _ice_params;
     int _socket = -1;
     std::unique_ptr<AsyncUdpSocket> _async_socket;
     rtc::SocketAddress _local_addr;
     std::vector<Candidate> _candidates;
+
+    //当前port绑定的远端的connections
     AddressMap _connections;
 };
 

@@ -1,4 +1,4 @@
-
+ï»¿
 #ifndef  __ICE_CANDIDATE_H_
 #define  __ICE_CANDIDATE_H_
 
@@ -17,22 +17,22 @@ public:
     std::string to_string() const;
 
 public:
-    //ÊÇrtp»¹ÊÇrtcp
+    //æ˜¯rtpè¿˜æ˜¯rtcp
     IceCandidateComponent component; 
     //udp or tcp
     std::string protocol;
-    //µØÖ·ºÍ¶Ë¿Ú
+    //åœ°å€å’Œç«¯å£
     rtc::SocketAddress address;
-    //¶Ë¿Ú addressÀïÒ²ÓĞport
+    //ç«¯å£ addressé‡Œä¹Ÿæœ‰port
     int port = 0;
     uint32_t priority;
     std::string username;
     std::string password;
     std::string type;
     /*
-    * Foundation ÊÇÒ»¸ö×Ö·û´®£¬ÓÃÓÚ±êÊ¶Ò»×é¾ßÓĞÏàÍ¬ÍøÂçÊôĞÔµÄºòÑ¡µØÖ·¡£
-    ËüµÄÖ÷Òª×÷ÓÃÊÇÔÚ ICE Ğ­ÉÌ¹ı³ÌÖĞ£¬°ïÖú¶ÔµÈ¶Ë£¨peer£©Ê¶±ğÄÄĞ©ºòÑ¡µØÖ·ÊÇ»ùÓÚÏàÍ¬µÄÍøÂç½Ó¿Ú»òÂ·¾¶Éú³ÉµÄ¡£
-    ¾ßÓĞÏàÍ¬ foundation µÄºòÑ¡µØÖ·Í¨³£ÒâÎ¶×ÅËüÃÇ¹²ÏíÏàËÆµÄÍøÂçÌØĞÔ£¬ÀıÈçÊ¹ÓÃÏàÍ¬µÄ IP µØÖ·¡¢Ğ­Òé£¨UDP/TCP£©µÈ¡£
+    * Foundation æ˜¯ä¸€ä¸ªå­—ç¬¦ä¸²ï¼Œç”¨äºæ ‡è¯†ä¸€ç»„å…·æœ‰ç›¸åŒç½‘ç»œå±æ€§çš„å€™é€‰åœ°å€ã€‚
+    å®ƒçš„ä¸»è¦ä½œç”¨æ˜¯åœ¨ ICE åå•†è¿‡ç¨‹ä¸­ï¼Œå¸®åŠ©å¯¹ç­‰ç«¯ï¼ˆpeerï¼‰è¯†åˆ«å“ªäº›å€™é€‰åœ°å€æ˜¯åŸºäºç›¸åŒçš„ç½‘ç»œæ¥å£æˆ–è·¯å¾„ç”Ÿæˆçš„ã€‚
+    å…·æœ‰ç›¸åŒ foundation çš„å€™é€‰åœ°å€é€šå¸¸æ„å‘³ç€å®ƒä»¬å…±äº«ç›¸ä¼¼çš„ç½‘ç»œç‰¹æ€§ï¼Œä¾‹å¦‚ä½¿ç”¨ç›¸åŒçš„ IP åœ°å€ã€åè®®ï¼ˆUDP/TCPï¼‰ç­‰ã€‚
     */
     std::string foundation;
 };
