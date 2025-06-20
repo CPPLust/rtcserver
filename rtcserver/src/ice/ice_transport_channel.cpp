@@ -1,4 +1,4 @@
-#include <rtc_base/logging.h>
+ï»¿#include <rtc_base/logging.h>
 #include "ice/udp_port.h"
 #include "ice/ice_transport_channel.h"
 #include "ice/ice_connection.h"
@@ -90,14 +90,14 @@ void IceTransportChannel::_on_unknown_address(UDPPort* port,
     remote_candidate.protocol = "udp";
     remote_candidate.address = addr;
     remote_candidate.username = remote_ufrag;
-    remote_candidate.password = _remote_ice_params.ice_pwd;  //Õâ¸öÊÇsdp½»»»¹ıÀ´µÄ
+    remote_candidate.password = _remote_ice_params.ice_pwd;  //è¿™ä¸ªæ˜¯sdpäº¤æ¢è¿‡æ¥çš„
     remote_candidate.priority = remote_priority;
     remote_candidate.type = PRFLX_PORT_TYPE;
 
     RTC_LOG(LS_INFO) << to_string() << ": create peer reflexive candidate: "
         << remote_candidate.to_string();
 
-    //Õâ¸öconn ¹ØÁªÁË±¾µØµÄconnection ºÍÔ¶¶ËµÄconnection
+    //è¿™ä¸ªconn å…³è”äº†æœ¬åœ°çš„connection å’Œè¿œç«¯çš„connection
     IceConnection* conn = port->create_connection(remote_candidate);
     if (!conn) {
         RTC_LOG(LS_WARNING) << to_string() << ": create connection from "
@@ -108,7 +108,7 @@ void IceTransportChannel::_on_unknown_address(UDPPort* port,
         return;
     }
 
-    //¶Ô¶ËµÄÍâÍøµØÖ· Ò²½Ğ·´ÉäµØÖ·
+    //å¯¹ç«¯çš„å¤–ç½‘åœ°å€ ä¹Ÿå«åå°„åœ°å€
     RTC_LOG(LS_INFO) << to_string() << ": create connection from "
         << " peer reflexive candidate success, remote_addr: "
         << addr.ToString();

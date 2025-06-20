@@ -1,4 +1,4 @@
-#ifndef  __ICE_TRANSPORT_CHANNEL_H_
+﻿#ifndef  __ICE_TRANSPORT_CHANNEL_H_
 #define  __ICE_TRANSPORT_CHANNEL_H_
 
 #include <vector>
@@ -37,9 +37,9 @@ public:
 
 private:
     //port udp port
-    //addr Զ�˵ĵ�ַ
+    //addr 远端的地址
     //msg stunmessage
-    //remote_ufrag  Զ�˵�uflag
+    //remote_ufrag  远端的uflag
     void _on_unknown_address(UDPPort* port,
         const rtc::SocketAddress& addr, 
         StunMessage* msg, 
