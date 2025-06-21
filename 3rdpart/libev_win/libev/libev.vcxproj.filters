@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="..\src\config.h" />
+    <ClInclude Include="..\src\ev.h" />
+    <ClInclude Include="..\src\ev_vars.h" />
+    <ClInclude Include="..\src\ev_wrap.h" />
+    <ClInclude Include="..\src\ev++.h" />
+    <ClInclude Include="..\src\event.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\ev.c" />
+    <ClCompile Include="..\src\event.c" />
+  </ItemGroup>
+</Project>
