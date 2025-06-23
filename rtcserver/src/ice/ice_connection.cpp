@@ -4,6 +4,44 @@
 
 namespace xrtc {
 
+ConnectionRequest::ConnectionRequest(IceConnection* conn) :
+    StunRequest(new StunMessage()), _connection(conn)
+{
+
+}
+
+void ConnectionRequest::prepare(StunMessage* msg) {
+    msg->set_type(STUN_BINDING_REQUEST);
+    std::string username;
+    _connection->port()->create_stun_username(
+            _connection->remote_candidate().username, &username);
+    msg->add_attribute(std::make_unique<StunByteStringAttribute>(
+                STUN_ATTR_USERNAME, username));
+    msg->add_attribute(std::make_unique<StunUInt64Attribute>(
+                STUN_ATTR_ICE_CONTROLLING, 0));
+    msg->add_attribute(std::make_unique<StunByteStringAttribute>(
+                STUN_ATTR_USE_CANDIDATE, 0));
+    // priority
+    int type_pref = ICE_TYPE_PREFERENCE_PRFLX;
+    uint32_t prflx_priority = (type_pref << 24) |
+        (_connection->local_candidate().priority & 0x00FFFFFF);
+    msg->add_attribute(std::make_unique<StunUInt32Attribute>(
+                STUN_ATTR_PRIORITY, prflx_priority));
+    msg->add_message_integrity(_connection->remote_candidate().password);
+    msg->add_fingerprint();
+}
+
+void ConnectionRequest::on_request_response(StunMessage* msg) {
+    _connection->on_connection_request_response(this, msg);
+}
+
+void ConnectionRequest::on_request_error_response(StunMessage* msg) {
+    _connection->on_connection_request_error_response(this, msg);
+}
+
+const Candidate& IceConnection::local_candidate() const {
+    return _port->candidates()[0];
+}
 IceConnection::IceConnection(EventLoop* el, 
         UDPPort* port, 
         const Candidate& remote_candidate) :
@@ -11,9 +49,52 @@ IceConnection::IceConnection(EventLoop* el,
     _port(port),
     _remote_candidate(remote_candidate)
 {
+    _requests.signal_send_packet.connect(this, &IceConnection::_on_stun_send_packet);
 }
 
 IceConnection::~IceConnection() {
+
+}
+
+void IceConnection::_on_stun_send_packet(StunRequest* request, const char* buf, size_t len) {
+    int ret = _port->send_to(buf, len, _remote_candidate.address);
+    if (ret < 0) {
+        RTC_LOG(LS_WARNING) << to_string() << ": Failed to send STUN binding request: ret="
+            << ret << ", id=" << rtc::hex_encode(request->id());
+    }
+}
+
+void IceConnection::print_pings_since_last_response(std::string& pings, size_t max) {
+    std::stringstream ss;
+    if (_pings_since_last_response.size() > max) {
+        for (size_t i = 0; i < max; ++i) {
+            ss << rtc::hex_encode(_pings_since_last_response[i].id) << " ";
+        }
+        ss << "... " << (_pings_since_last_response.size() - max) << " more";
+    } else {
+        for (auto ping : _pings_since_last_response) {
+            ss << rtc::hex_encode(ping.id) << " ";
+        }
+    }
+    pings = ss.str();
+}
+
+void IceConnection::on_connection_request_response(ConnectionRequest* request, 
+        StunMessage* msg) 
+{
+    int rtt = request->elapsed();
+    std::string pings;
+    print_pings_since_last_response(pings, 5);
+    RTC_LOG(LS_INFO) << to_string() << ": Received "
+        << stun_method_to_string(msg->type())
+        << ", id=" << rtc::hex_encode(msg->transaction_id())
+        << ", rtt=" << rtt
+        << ", pings=" << pings;
+}
+
+void IceConnection::on_connection_request_error_response(ConnectionRequest* request, 
+        StunMessage* msg) 
+{
 
 }
 
@@ -83,8 +164,8 @@ void IceConnection::on_read_packet(const char* buf, size_t len, int64_t ts) {
                         << " with bad username=" << remote_ufrag
                         << ", id=" << rtc::hex_encode(stun_msg->transaction_id());
                     _port->send_binding_error_response(stun_msg.get(),
-                            remote.address, STUN_ERROR_UNATHORIZED,
-                            STUN_ERROR_REASON_UNATHORIZED);
+                            remote.address, STUN_ERROR_UNAUTHORIZED,
+                            STUN_ERROR_REASON_UNAUTHORIZED);
                 } else {
                     RTC_LOG(LS_INFO) << to_string() << ": Received "
                         << stun_method_to_string(stun_msg->type())
@@ -92,10 +173,39 @@ void IceConnection::on_read_packet(const char* buf, size_t len, int64_t ts) {
                     handle_stun_binding_request(stun_msg.get());
                 }
                 break;
+            case STUN_BINDING_RESPONSE:
+            case STUN_BINDING_ERROR_RESPONSE:
+                stun_msg->validate_message_integrity(_remote_candidate.password);
+                if (stun_msg->integrity_ok()) {
+                    _requests.check_response(stun_msg.get());
+                }
+                break;
             default:
                 break;
         }
     }
+}
+
+void IceConnection::maybe_set_remote_ice_params(const IceParameters& ice_params) {
+    if (_remote_candidate.username == ice_params.ice_ufrag &&
+            _remote_candidate.password.empty())
+    {
+        _remote_candidate.password = ice_params.ice_pwd;
+    }
+}
+
+bool IceConnection::stable(int64_t now) const {
+    // todo
+    return false;
+}
+
+void IceConnection::ping(int64_t now) {
+    ConnectionRequest* request = new ConnectionRequest(this);
+    _pings_since_last_response.push_back(SentPing(request->id(), now));
+    RTC_LOG(LS_INFO) << to_string() << ": Sending STUN ping, id=" 
+        << rtc::hex_encode(request->id());
+    _requests.send(request);
+    _num_pings_sent++;
 }
 
 std::string IceConnection::to_string() {

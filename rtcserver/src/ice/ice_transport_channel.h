@@ -11,6 +11,7 @@
 #include "ice/ice_credentials.h"
 #include "ice/candidate.h"
 #include "ice/stun.h"
+#include "ice/ice_controller.h"
 
 namespace xrtc {
 
@@ -44,6 +45,13 @@ private:
         const rtc::SocketAddress& addr, 
         StunMessage* msg, 
         const std::string& remote_ufrag);
+    void _add_connection(IceConnection* conn);
+    void _sort_connections_and_update_state();
+    void _maybe_start_pinging();
+    void _on_check_and_ping();
+    void _ping_connection(IceConnection* conn);
+
+    friend void ice_ping_cb(EventLoop* /*el*/, TimerWatcher* /*w*/, void* data);
 
 private:
     EventLoop* _el;
@@ -53,6 +61,11 @@ private:
     IceParameters _ice_params;
     IceParameters _remote_ice_params;
     std::vector<Candidate> _local_candidates;
+    std::unique_ptr<IceController> _ice_controller;
+    bool _start_pinging = false;
+    TimerWatcher* _ping_watcher = nullptr;
+    int _cur_ping_interval = WEAK_PING_INTERVAL;
+    int64_t _last_ping_sent_ms = 0;
 };
 
 } // namespace xrtc

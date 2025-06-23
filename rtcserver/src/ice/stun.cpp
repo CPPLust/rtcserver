@@ -10,7 +10,7 @@ const char EMPTY_TRANSACION_ID[] = "000000000000";
 const size_t STUN_FINGERPRINT_XOR_VALUE = 0x5354554e;
 const char STUN_ERROR_REASON_BAD_REQUEST[] = "Bad request";
 
-const char STUN_ERROR_REASON_UNATHORIZED[] = "Unathorized";
+const char STUN_ERROR_REASON_UNAUTHORIZED[] = "Unauthorized";
 const char STUN_ERROR_REASON_SERVER_ERROR[] = "Server error";
 
 std::string stun_method_to_string(int type) {
@@ -19,6 +19,8 @@ std::string stun_method_to_string(int type) {
             return "BINDING REQUEST";
         case STUN_BINDING_RESPONSE:
             return "BINDING RESPONSE";
+        case STUN_BINDING_ERROR_RESPONSE:
+            return "BINDING ERROR_RESPONSE";
         default:
             return "Unknown<" + std::to_string(type) + ">";
     }
@@ -429,6 +431,12 @@ StunAttribute* StunAttribute::create(StunAttributeValueType value_type,
             return nullptr;
     }
 }
+
+std::unique_ptr<StunErrorCodeAttribute> StunAttribute::create_error_code() {
+    return std::make_unique<StunErrorCodeAttribute>(
+            STUN_ATTR_ERROR_CODE, StunErrorCodeAttribute::MIN_SIZE);
+}
+
 void StunAttribute::consume_padding(rtc::ByteBufferReader* buf) {
     //判断是否是4字节对齐
     int remain = length() % 4;
@@ -590,6 +598,25 @@ bool StunUInt32Attribute::write(rtc::ByteBufferWriter* buf) {
     return true;
 }
 
+// UInt64
+StunUInt64Attribute::StunUInt64Attribute(uint16_t type) :
+    StunAttribute(type, SIZE), _bits(0) {}
+
+StunUInt64Attribute::StunUInt64Attribute(uint16_t type, uint64_t value) :
+    StunAttribute(type, SIZE), _bits(value) {}
+
+bool StunUInt64Attribute::read(rtc::ByteBufferReader* buf) {
+    if (length() != SIZE || !buf->ReadUInt64(&_bits)) {
+        return false;
+    }
+    return true;
+}
+
+bool StunUInt64Attribute::write(rtc::ByteBufferWriter* buf) {
+    buf->WriteUInt64(_bits);
+    return true;
+}
+
 // ByteString
 StunByteStringAttribute::StunByteStringAttribute(uint16_t type, uint16_t length) :
     StunAttribute(type, length) {}
@@ -639,6 +666,47 @@ bool StunByteStringAttribute::write(rtc::ByteBufferWriter* buf) {
     buf->WriteBytes(_bytes, length());
     write_padding(buf);
     return true;
+}
+
+// error code
+
+const uint16_t StunErrorCodeAttribute::MIN_SIZE = 4;
+
+StunErrorCodeAttribute::StunErrorCodeAttribute(uint16_t type, uint16_t length) :
+    StunAttribute(type, length), _class(0), _number(0) {}
+
+void StunErrorCodeAttribute::set_code(int code) {
+    _class = code / 100;
+    _number = code % 100;
+}
+
+void StunErrorCodeAttribute::set_reason(const std::string& reason) {
+    _reason = reason;
+    set_length(MIN_SIZE + reason.size());
+}
+
+bool StunErrorCodeAttribute::read(rtc::ByteBufferReader* buf) {
+    // todo
+    return false;
+}
+
+bool StunErrorCodeAttribute::write(rtc::ByteBufferWriter* buf) {
+    buf->WriteUInt32(_class << 8 | _number);
+    buf->WriteString(_reason);
+    write_padding(buf);
+    return true;
+}
+
+int get_stun_success_response(int req_type) {
+    return is_stun_request_type(req_type) ? (req_type | 0x100) : -1;
+}
+
+int get_stun_error_response(int req_type) {
+    return is_stun_request_type(req_type) ? (req_type | 0x110) : -1;
+}
+
+bool is_stun_request_type(int req_type) {
+    return (req_type & k_stun_type_mask) == 0x000;
 }
 
 } // namespace xrtc

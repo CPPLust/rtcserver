@@ -33,11 +33,13 @@
     <ClCompile Include="src\ice\candidate.cpp" />
     <ClCompile Include="src\ice\ice_agent.cpp" />
     <ClCompile Include="src\ice\ice_connection.cpp" />
+    <ClCompile Include="src\ice\ice_controller.cpp" />
     <ClCompile Include="src\ice\ice_credentials.cpp" />
     <ClCompile Include="src\ice\ice_def.cpp" />
     <ClCompile Include="src\ice\ice_transport_channel.cpp" />
     <ClCompile Include="src\ice\port_allocator.cpp" />
     <ClCompile Include="src\ice\stun.cpp" />
+    <ClCompile Include="src\ice\stun_request.cpp" />
     <ClCompile Include="src\ice\udp_port.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\pc\peer_connection.cpp" />
@@ -67,11 +69,13 @@
     <ClInclude Include="src\ice\candidate.h" />
     <ClInclude Include="src\ice\ice_agent.h" />
     <ClInclude Include="src\ice\ice_connection.h" />
+    <ClInclude Include="src\ice\ice_controller.h" />
     <ClInclude Include="src\ice\ice_credentials.h" />
     <ClInclude Include="src\ice\ice_def.h" />
     <ClInclude Include="src\ice\ice_transport_channel.h" />
     <ClInclude Include="src\ice\port_allocator.h" />
     <ClInclude Include="src\ice\stun.h" />
+    <ClInclude Include="src\ice\stun_request.h" />
     <ClInclude Include="src\ice\udp_port.h" />
     <ClInclude Include="src\pc\codec_info.h" />
     <ClInclude Include="src\pc\peer_connection.h" />
