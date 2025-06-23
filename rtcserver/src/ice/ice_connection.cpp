@@ -9,6 +9,8 @@ namespace xrtc {
 
 // old_rtt : new_rtt = 3 : 1
 const int RTT_RATIO = 3;
+const int MIN_RTT = 100;
+const int MAX_RTT = 60000;
 
 ConnectionRequest::ConnectionRequest(IceConnection* conn) :
     StunRequest(new StunMessage()), _connection(conn)
@@ -34,7 +36,6 @@ void ConnectionRequest::prepare(StunMessage* msg) {
     msg->add_attribute(std::make_unique<StunUInt32Attribute>(
                 STUN_ATTR_PRIORITY, prflx_priority));
     //要传远端的pwd
-
     msg->add_message_integrity(_connection->remote_candidate().password);
     msg->add_fingerprint();
 }
@@ -64,6 +65,7 @@ IceConnection::~IceConnection() {
 
 }
 
+//
 void IceConnection::_on_stun_send_packet(StunRequest* request, const char* buf, size_t len) {
     int ret = _port->send_to(buf, len, _remote_candidate.address);
     if (ret < 0) {
@@ -177,6 +179,56 @@ void IceConnection::destroy() {
     delete this;
 }
 
+bool IceConnection::_too_many_ping_fails(size_t max_pings, int rtt, int64_t now) {
+    if (_pings_since_last_response.size() < max_pings) {
+        return false;
+    }
+
+    int expected_response_time = _pings_since_last_response[max_pings-1].sent_time + rtt;
+    return now > expected_response_time;
+}
+
+bool IceConnection::_too_long_without_response(int min_time, int64_t now) {
+    if (_pings_since_last_response.empty()) {
+        return false;
+    }
+
+    return now > _pings_since_last_response[0].sent_time + min_time;
+}
+
+void IceConnection::update_state(int64_t now) {
+    int rtt = 2 * _rtt;
+    if (rtt < MIN_RTT) {
+        rtt = MIN_RTT;
+    } else if (rtt > MAX_RTT) {
+        rtt = MAX_RTT;
+    }
+
+    if (_write_state == STATE_WRITABLE &&
+            _too_many_ping_fails(CONNECTION_WRITE_CONNECT_FAILS, rtt, now) &&
+            _too_long_without_response(CONNECTION_WRITE_CONNECT_TIMEOUT, now))
+    {
+        RTC_LOG(LS_INFO) << to_string() << ": Unwritable after "
+            << CONNECTION_WRITE_CONNECT_FAILS << " ping fails and "
+            << now - _pings_since_last_response[0].sent_time
+            << "ms without a response";
+
+        set_write_state(STATE_WRITE_UNRELIABLE);
+    }
+
+    if ((_write_state == STATE_WRITE_UNRELIABLE || _write_state == STATE_WRITE_INIT) &&
+            _too_long_without_response(CONNECTION_WRITE_TIMEOUT, now))
+    {
+        RTC_LOG(LS_INFO) << to_string() << ": Timeout after "
+            << now - _pings_since_last_response[0].sent_time
+            << "ms without a response";
+
+        set_write_state(STATE_WRITE_TIMEOUT);
+    }
+
+    update_receiving(now);
+}
+
 void IceConnection::on_connection_request_error_response(ConnectionRequest* request, 
         StunMessage* msg) 
 {
@@ -267,7 +319,7 @@ void IceConnection::on_read_packet(const char* buf, size_t len, int64_t ts) {
     const Candidate& remote = _remote_candidate;
     if (!_port->get_stun_message(buf, len, remote.address, &stun_msg, &remote_ufrag)) {
         // 这个不是stun包，可能是其它的比如dtls或者rtp包
-        
+        signal_read_packet(this, buf, len, ts); 
     } else if (!stun_msg) {
     } else { // stun message
         switch (stun_msg->type()) {
@@ -289,6 +341,7 @@ void IceConnection::on_read_packet(const char* buf, size_t len, int64_t ts) {
                 break;
             case STUN_BINDING_RESPONSE:
             case STUN_BINDING_ERROR_RESPONSE:
+                //验证一下消息完整性
                 stun_msg->validate_message_integrity(_remote_candidate.password);
                 if (stun_msg->integrity_ok()) {
                     _requests.check_response(stun_msg.get());

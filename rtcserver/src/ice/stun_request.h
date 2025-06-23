@@ -51,6 +51,7 @@ protected:
 private:
     StunMessage* _msg;
     StunRequestManager* _manager = nullptr;
+    //这个request的发送时的时间
     int64_t _ts = 0;
 };
 

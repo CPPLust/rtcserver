@@ -119,6 +119,7 @@ public:
     IntegrityStatus validate_message_integrity(const std::string& password);
     bool add_message_integrity(const std::string& password);
     IntegrityStatus integrity() { return _integrity; }
+    //判断状态
     bool integrity_ok() { return _integrity == IntegrityStatus::k_integrity_ok; }
 
     StunAttributeValueType get_attribute_value_type(int type);

@@ -59,6 +59,7 @@ public:
     void on_connection_request_response(ConnectionRequest* request, StunMessage* msg);
     void on_connection_request_error_response(ConnectionRequest* request, StunMessage* msg);
     void maybe_set_remote_ice_params(const IceParameters& ice_params);
+   //打印当前还有多少没有响应
     void print_pings_since_last_response(std::string& pings, size_t max);
 
     void set_write_state(WriteState state);
@@ -80,7 +81,8 @@ public:
     IceCandidatePairState state() { return _state; }
     void destroy();
     void fail_and_destroy();
-    
+    void update_state(int64_t now);
+
     int64_t last_ping_sent() const { return _last_ping_sent; }
     int64_t last_received();
     int num_pings_sent() const { return _num_pings_sent; }
@@ -89,11 +91,14 @@ public:
     
     sigslot::signal1<IceConnection*> signal_state_change;
     sigslot::signal1<IceConnection*> signal_connection_destroy;
+    sigslot::signal4<IceConnection*, const char*, size_t, int64_t> signal_read_packet;
 
 private:
     //信号槽  manager准备好的数据ping request
     void _on_stun_send_packet(StunRequest* request, const char* buf, size_t len);
     bool _miss_response(int64_t now) const;
+    bool _too_many_ping_fails(size_t max_pings, int rtt, int64_t now);
+    bool _too_long_without_response(int min_time, int64_t now);
 
 private:
     EventLoop* _el;
@@ -108,6 +113,7 @@ private:
 
     int64_t _last_ping_sent = 0;
     int64_t _last_ping_received = 0;
+    //收到pingresponse 的时间
     int64_t _last_ping_response_received = 0;
     int64_t _last_data_received = 0;
     int _num_pings_sent = 0;

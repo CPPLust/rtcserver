@@ -720,6 +720,7 @@ int get_stun_error_response(int req_type) {
 }
 
 bool is_stun_request_type(int req_type) {
+    //相同为0 不同为1
     return (req_type & k_stun_type_mask) == 0x000;
 }
 

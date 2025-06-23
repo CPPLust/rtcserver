@@ -145,7 +145,15 @@ void IceTransportChannel::_add_connection(IceConnection* conn) {
             &IceTransportChannel::_on_connection_state_change);
     conn->signal_connection_destroy.connect(this,
             &IceTransportChannel::_on_connection_destroyed);
+    conn->signal_read_packet.connect(this,
+            &IceTransportChannel::_on_read_packet);
     _ice_controller->add_connection(conn);
+}
+
+void IceTransportChannel::_on_read_packet(IceConnection* /*conn*/,
+        const char* buf, size_t len, int64_t ts)
+{
+    signal_read_packet(this, buf, len, ts);
 }
 
 void IceTransportChannel::_on_connection_destroyed(IceConnection* conn) {
@@ -158,7 +166,7 @@ void IceTransportChannel::_on_connection_destroyed(IceConnection* conn) {
         _switch_selected_connection(nullptr);
         _sort_connections_and_update_state();
     } else {
-        // todo
+        _update_state();
     }
 }
 
@@ -168,7 +176,44 @@ void IceTransportChannel::_on_connection_state_change(IceConnection* /*conn*/) {
 
 void IceTransportChannel::_sort_connections_and_update_state() {
     _maybe_switch_selected_connection(_ice_controller->sort_and_switch_connection());
+    
+    _update_state();
+    
     _maybe_start_pinging();
+}
+
+void IceTransportChannel::_set_writable(bool writable) {
+    if (_writable == writable) {
+        return;
+    }
+
+    _writable = writable;
+    RTC_LOG(LS_INFO) << to_string() << ": Change writable to " << _writable;
+    signal_writable_state(this);
+}
+
+void IceTransportChannel::_set_receiving(bool receiving) {
+    if (_receiving == receiving) {
+        return;
+    }
+
+    _receiving = receiving;
+    RTC_LOG(LS_INFO) << to_string() << ": Change receiving to " << _receiving;
+    signal_receiving_state(this);
+}
+
+void IceTransportChannel::_update_state() {
+    bool writable = _selected_connection && _selected_connection->writable();
+    _set_writable(writable);
+
+    bool receiving = false;
+    for (auto conn : _ice_controller->connections()) {
+        if (conn->receiving()) {
+            receiving = true;
+            break;
+        }
+    }
+    _set_receiving(receiving);
 }
 
 void IceTransportChannel::_maybe_switch_selected_connection(IceConnection* conn) {
@@ -215,6 +260,8 @@ void IceTransportChannel::_maybe_start_pinging() {
 }
 
 void IceTransportChannel::_on_check_and_ping() {
+    _update_connection_states();
+
     auto result = _ice_controller->select_connection_to_ping(
             _last_ping_sent_ms - PING_INTERVAL_DIFF);
     
@@ -227,11 +274,18 @@ void IceTransportChannel::_on_check_and_ping() {
         _ice_controller->mark_connection_pinged(conn);
     }
 
-    //间隔时间发生改变
     if (_cur_ping_interval != result.ping_interval) {
         _cur_ping_interval = result.ping_interval;
         _el->stop_timer(_ping_watcher);
         _el->start_timer(_ping_watcher, _cur_ping_interval * 1000); 
+    }
+}
+
+void IceTransportChannel::_update_connection_states() {
+    std::vector<IceConnection*> connections = _ice_controller->connections();
+    int64_t now = rtc::TimeMillis();
+    for (auto conn : connections) {
+        conn->update_state(now);
     }
 }
 

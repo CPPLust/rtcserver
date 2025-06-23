@@ -24,7 +24,7 @@ public:
             IceCandidateComponent component);
     virtual ~IceTransportChannel();
     
-    std::string transport_name() { return _transport_name; }
+    const std::string& transport_name() { return _transport_name; }
     IceCandidateComponent component() { return _component; }
     
     void set_ice_params(const IceParameters& ice_params);
@@ -35,6 +35,9 @@ public:
 
     sigslot::signal2<IceTransportChannel*, const std::vector<Candidate>&>
         signal_candidate_allocate_done;
+    sigslot::signal1<IceTransportChannel*> signal_receiving_state;
+    sigslot::signal1<IceTransportChannel*> signal_writable_state;
+    sigslot::signal4<IceTransportChannel*, const char*, size_t, int64_t> signal_read_packet;
 
 private:
     //port udp port
@@ -52,9 +55,15 @@ private:
     void _on_check_and_ping();
     void _on_connection_state_change(IceConnection* conn);
     void _on_connection_destroyed(IceConnection* conn);
+    void _on_read_packet(IceConnection* conn, const char* buf, size_t len, int64_t ts);
+
     void _ping_connection(IceConnection* conn);
     void _maybe_switch_selected_connection(IceConnection* conn);
     void _switch_selected_connection(IceConnection* conn);
+    void _update_connection_states();
+    void _update_state();
+    void _set_receiving(bool receiving);
+    void _set_writable(bool writable);
     friend void ice_ping_cb(EventLoop* /*el*/, TimerWatcher* /*w*/, void* data);
 
 private:
@@ -72,6 +81,8 @@ private:
     int _cur_ping_interval = WEAK_PING_INTERVAL;
     int64_t _last_ping_sent_ms = 0;
     IceConnection* _selected_connection = nullptr;
+    bool _receiving = false;
+    bool _writable = false;
 };
 
 } // namespace xrtc
