@@ -14,6 +14,7 @@ void async_udp_socket_io_cb(EventLoop* /*el*/, IOWatcher* /*w*/,
     if (EventLoop::READ & events) {
         udp_socket->recv_data();
     }
+    //98 XRTC1.0-发送binding响应.vip
     if (EventLoop::WRITE & events) {
         udp_socket->send_data();
     }

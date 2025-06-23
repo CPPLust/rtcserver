@@ -1,8 +1,14 @@
 ﻿#include <rtc_base/logging.h>
+#include <rtc_base/time_utils.h>
+#include <rtc_base/helpers.h>
+
 #include "ice/udp_port.h"
 #include "ice/ice_connection.h"
 
 namespace xrtc {
+
+// old_rtt : new_rtt = 3 : 1
+const int RTT_RATIO = 3;
 
 ConnectionRequest::ConnectionRequest(IceConnection* conn) :
     StunRequest(new StunMessage()), _connection(conn)
@@ -27,6 +33,8 @@ void ConnectionRequest::prepare(StunMessage* msg) {
         (_connection->local_candidate().priority & 0x00FFFFFF);
     msg->add_attribute(std::make_unique<StunUInt32Attribute>(
                 STUN_ATTR_PRIORITY, prflx_priority));
+    //要传远端的pwd
+
     msg->add_message_integrity(_connection->remote_candidate().password);
     msg->add_fingerprint();
 }
@@ -79,6 +87,63 @@ void IceConnection::print_pings_since_last_response(std::string& pings, size_t m
     pings = ss.str();
 }
 
+int64_t IceConnection::last_received() {
+    return std::max(std::max(_last_ping_received, _last_ping_response_received),
+            _last_data_received);
+}
+
+int IceConnection::receiving_timeout() {
+    return WEAK_CONNECTION_RECEIVE_TIMEOUT;
+}
+
+void IceConnection::update_receiving(int64_t now) {
+    bool receiving;
+    if (_last_ping_sent < _last_ping_response_received) {
+        receiving = true;
+    } else {
+        receiving = last_received() > 0 && 
+            (now < last_received() + receiving_timeout());
+    }
+
+    if (_receiving == receiving) {
+        return;
+    }
+
+    RTC_LOG(LS_INFO) << to_string() << ": set receiving to " << receiving;
+    _receiving = receiving;
+    signal_state_change(this);
+}
+
+void IceConnection::set_write_state(WriteState state) {
+    WriteState old_state = _write_state;
+    _write_state = state;
+    if (old_state != state) {
+        RTC_LOG(LS_INFO) << to_string() << ": set write state from " << old_state
+            << " to " << state;
+        signal_state_change(this);
+    }
+}
+
+void IceConnection::received_ping_response(int rtt) {
+    // old_rtt : new_rtt = 3 : 1
+    // 5 10 20
+    // rtt = 5
+    // rtt = 5 * 0.75 + 10 * 0.25 = 3.75 + 2.5 = 6.25
+    if (_rtt_samples > 0) {
+        _rtt = rtc::GetNextMovingAverage(_rtt, rtt, RTT_RATIO);
+    } else {
+        _rtt = rtt;
+    }
+    
+    ++_rtt_samples;
+
+    _last_ping_response_received = rtc::TimeMillis();
+    _pings_since_last_response.clear();
+    update_receiving(_last_ping_response_received);
+    set_write_state(STATE_WRITABLE);
+    set_state(IceCandidatePairState::SUCCEEDED);
+}
+
 void IceConnection::on_connection_request_response(ConnectionRequest* request, 
         StunMessage* msg) 
 {
@@ -90,12 +155,59 @@ void IceConnection::on_connection_request_response(ConnectionRequest* request,
         << ", id=" << rtc::hex_encode(msg->transaction_id())
         << ", rtt=" << rtt
         << ", pings=" << pings;
+    received_ping_response(rtt);
+}
+
+void IceConnection::set_state(IceCandidatePairState state) {
+    IceCandidatePairState old_state = _state;
+    _state = state;
+    if (old_state != state) {
+        RTC_LOG(LS_INFO) << to_string() << ": set_state " << old_state << "->" << _state;
+    }
+}
+
+void IceConnection::fail_and_destroy() {
+    set_state(IceCandidatePairState::FAILED);
+    destroy();
+}
+
+void IceConnection::destroy() {
+    RTC_LOG(LS_INFO) << to_string() << ": Connection destroyed";
+    signal_connection_destroy(this);
+    delete this;
 }
 
 void IceConnection::on_connection_request_error_response(ConnectionRequest* request, 
         StunMessage* msg) 
 {
+    int rtt = request->elapsed();
+    int error_code = msg->get_error_code_value();
+    RTC_LOG(LS_WARNING) << to_string() << ": Received: "
+        << stun_method_to_string(msg->type())
+        << ", id=" << rtc::hex_encode(msg->transaction_id())
+        << ", rtt=" << rtt
+        << ", code=" << error_code;
 
+    if (STUN_ERROR_UNAUTHORIZED == error_code ||
+            STUN_ERROR_UNKNOWN_ATTRIBUTE == error_code ||
+            STUN_ERROR_SERVER_ERROR == error_code)
+    {
+        // retry maybe recover
+    } else {
+        fail_and_destroy();
+    }
+}
+
+// rfc5245
+// g : controlling candidate priority
+// d : controlled candidate priority
+// conn priority = 2^32 * min(g, d) + 2 * max(g, d) + (g > d ? 1 : 0)
+uint64_t IceConnection::priority() {
+    uint32_t g = local_candidate().priority;
+    uint32_t d = remote_candidate().priority;
+    uint64_t priority = std::min(g, d);
+    priority = priority << 32;
+    return priority + 2 * std::max(g, d) + (g > d ? 1 : 0);
 }
 
 void IceConnection::handle_stun_binding_request(StunMessage* stun_msg) {
@@ -125,8 +237,10 @@ void IceConnection::send_stun_binding_response(StunMessage* stun_msg) {
 }
 
 void IceConnection::send_response_message(const StunMessage& response) {
+    //远端的地址
     const rtc::SocketAddress& addr = _remote_candidate.address;
 
+	//构建响应包
     rtc::ByteBufferWriter buf;
     if (!response.write(&buf)) {
         return;
@@ -195,16 +309,27 @@ void IceConnection::maybe_set_remote_ice_params(const IceParameters& ice_params)
 }
 
 bool IceConnection::stable(int64_t now) const {
-    // todo
-    return false;
+    return _rtt_samples > RTT_RATIO + 1 && !_miss_response(now);
+}
+
+bool IceConnection::_miss_response(int64_t now) const {
+    if (_pings_since_last_response.empty()) {
+        return false;
+    }
+
+    int waiting = now - _pings_since_last_response[0].sent_time;
+    return waiting > 2 * _rtt;
 }
 
 void IceConnection::ping(int64_t now) {
+    _last_ping_sent = now;
+
     ConnectionRequest* request = new ConnectionRequest(this);
     _pings_since_last_response.push_back(SentPing(request->id(), now));
     RTC_LOG(LS_INFO) << to_string() << ": Sending STUN ping, id=" 
         << rtc::hex_encode(request->id());
     _requests.send(request);
+    set_state(IceCandidatePairState::IN_PROGRESS);
     _num_pings_sent++;
 }
 

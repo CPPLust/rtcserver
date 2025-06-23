@@ -1,4 +1,4 @@
-
+﻿
 #ifndef  __STUN_REQUEST_H_
 #define  __STUN_REQUEST_H_
 
@@ -15,9 +15,10 @@ class StunRequest;
 class StunRequestManager {
 public:
     StunRequestManager() = default;
-    ~StunRequestManager() = default;
+    ~StunRequestManager();
 
     void send(StunRequest* request);
+    void remove(StunRequest* request);
     bool check_response(StunMessage* msg);
 
     sigslot::signal3<StunRequest*, const char*, size_t> signal_send_packet;
@@ -27,6 +28,7 @@ private:
     RequestMap _requests;
 };
 
+//服务器发送request
 class StunRequest {
 public:
     StunRequest(StunMessage* request);

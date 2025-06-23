@@ -286,6 +286,7 @@ void UDPPort::send_binding_error_response(StunMessage* stun_msg,
 void UDPPort::create_stun_username(const std::string& remote_username, 
         std::string* stun_attr_username)
 {
+    //
     stun_attr_username->clear();
     *stun_attr_username = remote_username;
     stun_attr_username->append(":");

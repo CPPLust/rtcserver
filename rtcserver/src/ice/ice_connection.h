@@ -6,12 +6,14 @@
 #include "ice/stun.h"
 #include "ice/stun_request.h"
 #include "ice/ice_credentials.h"
+#include "ice/ice_connection_info.h"
 
 namespace xrtc {
 
 class UDPPort;
 class IceConnection;
 
+//继承了StunRequest
 class ConnectionRequest : public StunRequest {
 public:
     ConnectionRequest(IceConnection* conn);
@@ -28,12 +30,13 @@ private:
 class IceConnection : public sigslot::has_slots<> {
 public:
     enum WriteState {
-        STATE_WRITABLE = 0,
+        STATE_WRITABLE = 0, //发送ping都能响应
         STATE_WRITE_UNRELIABLE = 1,
-        STATE_WRITE_INIT = 2,
-        STATE_WRITE_TIMEOUT = 3
+        STATE_WRITE_INIT = 2, //初始化
+        STATE_WRITE_TIMEOUT = 3 //超時狀態
     };
     
+    //发送ping
     struct SentPing {
         SentPing(const std::string& id, int64_t ts) :
             id(id), sent_time(ts) {}
@@ -58,20 +61,39 @@ public:
     void maybe_set_remote_ice_params(const IceParameters& ice_params);
     void print_pings_since_last_response(std::string& pings, size_t max);
 
+    void set_write_state(WriteState state);
+    WriteState write_state() { return _write_state; }
     bool writable() { return _write_state == STATE_WRITABLE; }
-    bool receving() { return _receiving; }
-    bool weak() { return !(writable() && receving()); }
+    bool receiving() { return _receiving; }
+    bool weak() { return !(writable() && receiving()); }
     bool active() { return _write_state != STATE_WRITE_TIMEOUT; }
     bool stable(int64_t now) const;
     void ping(int64_t now);
-
+    void received_ping_response(int rtt);
+    void update_receiving(int64_t now);
+    int receiving_timeout();
+    uint64_t priority();
+    int rtt() { return _rtt; }
+    void set_selected(bool value) { _selected = value; }
+    bool selected() { return _selected; }
+    void set_state(IceCandidatePairState state);
+    IceCandidatePairState state() { return _state; }
+    void destroy();
+    void fail_and_destroy();
+    
     int64_t last_ping_sent() const { return _last_ping_sent; }
+    int64_t last_received();
     int num_pings_sent() const { return _num_pings_sent; }
 
     std::string to_string();
+    
+    sigslot::signal1<IceConnection*> signal_state_change;
+    sigslot::signal1<IceConnection*> signal_connection_destroy;
 
 private:
+    //信号槽  manager准备好的数据ping request
     void _on_stun_send_packet(StunRequest* request, const char* buf, size_t len);
+    bool _miss_response(int64_t now) const;
 
 private:
     EventLoop* _el;
@@ -82,11 +104,20 @@ private:
 
     WriteState _write_state = STATE_WRITE_INIT;
     bool _receiving = false;
+    bool _selected = false;
 
     int64_t _last_ping_sent = 0;
+    int64_t _last_ping_received = 0;
+    int64_t _last_ping_response_received = 0;
+    int64_t _last_data_received = 0;
     int _num_pings_sent = 0;
+    //没有收到响应的response 的ping集合
     std::vector<SentPing> _pings_since_last_response;
+    //请求发送消息
     StunRequestManager _requests;
+    int _rtt = 3000;
+    int _rtt_samples = 0;
+    IceCandidatePairState _state = IceCandidatePairState::WAITING;
 };
 
 } // namespace xrtc

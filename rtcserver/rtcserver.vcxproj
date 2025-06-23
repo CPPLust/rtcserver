@@ -69,6 +69,7 @@
     <ClInclude Include="src\ice\candidate.h" />
     <ClInclude Include="src\ice\ice_agent.h" />
     <ClInclude Include="src\ice\ice_connection.h" />
+    <ClInclude Include="src\ice\ice_connection_info.h" />
     <ClInclude Include="src\ice\ice_controller.h" />
     <ClInclude Include="src\ice\ice_credentials.h" />
     <ClInclude Include="src\ice\ice_def.h" />

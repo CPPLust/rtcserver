@@ -46,11 +46,15 @@ private:
         StunMessage* msg, 
         const std::string& remote_ufrag);
     void _add_connection(IceConnection* conn);
+    //对练级重新排序
     void _sort_connections_and_update_state();
     void _maybe_start_pinging();
     void _on_check_and_ping();
+    void _on_connection_state_change(IceConnection* conn);
+    void _on_connection_destroyed(IceConnection* conn);
     void _ping_connection(IceConnection* conn);
-
+    void _maybe_switch_selected_connection(IceConnection* conn);
+    void _switch_selected_connection(IceConnection* conn);
     friend void ice_ping_cb(EventLoop* /*el*/, TimerWatcher* /*w*/, void* data);
 
 private:
@@ -62,10 +66,12 @@ private:
     IceParameters _remote_ice_params;
     std::vector<Candidate> _local_candidates;
     std::unique_ptr<IceController> _ice_controller;
+    //开始ping的状态
     bool _start_pinging = false;
     TimerWatcher* _ping_watcher = nullptr;
     int _cur_ping_interval = WEAK_PING_INTERVAL;
     int64_t _last_ping_sent_ms = 0;
+    IceConnection* _selected_connection = nullptr;
 };
 
 } // namespace xrtc
