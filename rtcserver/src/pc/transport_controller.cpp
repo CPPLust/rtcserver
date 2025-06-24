@@ -48,12 +48,17 @@ int TransportController::set_local_description(SessionDescription* desc) {
         //创建dtls 
         DtlsTransport* dtls = new DtlsTransport(
                 _ice_agent->get_channel(mid, IceCandidateComponent::RTP));
+        dtls->set_local_certificate(_local_certificate);
         _add_dtls_transport(dtls);
     }
     
     _ice_agent->gathering_candidate();
 
     return 0;
+}
+
+void TransportController::set_local_certificate(rtc::RTCCertificate* cert) {
+    _local_certificate = cert;
 }
 
 void TransportController::_add_dtls_transport(DtlsTransport* dtls) {
@@ -65,6 +70,15 @@ void TransportController::_add_dtls_transport(DtlsTransport* dtls) {
     }
 
     _dtls_transport_by_name[dtls->transport_name()] = dtls;
+}
+
+DtlsTransport* TransportController::_get_dtls_transport(const std::string& transport_name) {
+    auto iter = _dtls_transport_by_name.find(transport_name);
+    if (iter != _dtls_transport_by_name.end()) {
+        return iter->second;
+    }
+
+    return nullptr;
 }
 
 int TransportController::set_remote_description(SessionDescription* desc) {
@@ -82,6 +96,12 @@ int TransportController::set_remote_description(SessionDescription* desc) {
         if (td) {
             _ice_agent->set_remote_ice_params(content->mid(), IceCandidateComponent::RTP,
                     IceParameters(td->ice_ufrag, td->ice_pwd));
+            auto dtls = _get_dtls_transport(mid);
+            if (dtls) {
+                dtls->set_remote_fingerprint(td->identity_fingerprint->algorithm,
+                        td->identity_fingerprint->digest.cdata(),
+                        td->identity_fingerprint->digest.size());
+            }
         }
     }
 

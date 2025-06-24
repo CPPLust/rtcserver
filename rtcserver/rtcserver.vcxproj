@@ -20,8 +20,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\3rdpart\libwebrtc\src\rtc_base\logging.cc" />
+    <ClCompile Include="..\3rdpart\libwebrtc\src\rtc_base\openssl_stream_adapter.cc" />
     <ClCompile Include="..\3rdpart\libwebrtc\src\rtc_base\rtc_certificate_generator.cc" />
     <ClCompile Include="..\3rdpart\libwebrtc\src\rtc_base\string_encode.cc" />
+    <ClCompile Include="..\3rdpart\libwebrtc\src\system_wrappers\source\field_trial.cc" />
     <ClCompile Include="src\base\async_udp_socket.cpp" />
     <ClCompile Include="src\base\conf.cpp" />
     <ClCompile Include="src\base\event_loop.cpp" />
@@ -190,9 +192,9 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;WIN32;WEBRTC_WIN;NOMINMAX;YAML_CPP_STATIC_DEFINE;_CRT_SECURE_NO_WARNINGS;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;WIN32;WEBRTC_WIN;NOMINMAX;YAML_CPP_STATIC_DEFINE;_CRT_SECURE_NO_WARNINGS;WIN32_LEAN_AND_MEAN;_SILENCE_CXX17_RESULT_OF_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>../3rdpart\libev_win\src;../3rdpart\utilslib\src;../3rdpart\libev_win;../depend\win\debug\third_party;../depend\win\debug\absl\include;../depend\win\debug\yaml\include;./src;../3rdpart\libwebrtc\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../3rdpart\libev_win\src;../3rdpart\utilslib\src;../3rdpart\libev_win;../depend\win\debug\third_party;../depend\win\debug\absl\include;../depend\win\debug\openssl\include;../depend\win\debug\yaml\include;./src;../3rdpart\libwebrtc\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>

@@ -348,9 +348,6 @@
     <ClCompile Include="src\rtc_base\openssl_session_cache.cc">
       <Filter>源文件\src\rtc_base</Filter>
     </ClCompile>
-    <ClCompile Include="src\rtc_base\openssl_stream_adapter.cc">
-      <Filter>源文件\src\rtc_base</Filter>
-    </ClCompile>
     <ClCompile Include="src\rtc_base\openssl_utility.cc">
       <Filter>源文件\src\rtc_base</Filter>
     </ClCompile>
@@ -598,9 +595,6 @@
       <Filter>源文件\src\system_wrappers</Filter>
     </ClCompile>
     <ClCompile Include="src\system_wrappers\source\denormal_disabler.cc">
-      <Filter>源文件\src\system_wrappers</Filter>
-    </ClCompile>
-    <ClCompile Include="src\system_wrappers\source\field_trial.cc">
       <Filter>源文件\src\system_wrappers</Filter>
     </ClCompile>
     <ClCompile Include="src\system_wrappers\source\metrics.cc">

@@ -488,7 +488,6 @@
     <ClCompile Include="src\rtc_base\openssl_identity.cc" />
     <ClCompile Include="src\rtc_base\openssl_key_pair.cc" />
     <ClCompile Include="src\rtc_base\openssl_session_cache.cc" />
-    <ClCompile Include="src\rtc_base\openssl_stream_adapter.cc" />
     <ClCompile Include="src\rtc_base\openssl_utility.cc" />
     <ClCompile Include="src\rtc_base\pc\sds.cc" />
     <ClCompile Include="src\rtc_base\physical_socket_server.cc" />
@@ -537,7 +536,6 @@
     <ClCompile Include="src\system_wrappers\source\clock.cc" />
     <ClCompile Include="src\system_wrappers\source\cpu_features.cc" />
     <ClCompile Include="src\system_wrappers\source\denormal_disabler.cc" />
-    <ClCompile Include="src\system_wrappers\source\field_trial.cc" />
     <ClCompile Include="src\system_wrappers\source\metrics.cc" />
     <ClCompile Include="src\system_wrappers\source\sleep.cc" />
     <ClCompile Include="third_party\pffft\src\fftpack.c" />
