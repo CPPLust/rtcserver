@@ -101,8 +101,10 @@ int IceConnection::receiving_timeout() {
 void IceConnection::update_receiving(int64_t now) {
     bool receiving;
     if (_last_ping_sent < _last_ping_response_received) {
+        //最新一次收到response
         receiving = true;
     } else {
+        //容忍的时间内收到数据
         receiving = last_received() > 0 && 
             (now < last_received() + receiving_timeout());
     }
@@ -280,9 +282,12 @@ void IceConnection::send_stun_binding_response(StunMessage* stun_msg) {
     StunMessage response;
     response.set_type(STUN_BINDING_RESPONSE);
     response.set_transaction_id(stun_msg->transaction_id());
+    // 4 + 8
     response.add_attribute(std::make_unique<StunXorAddressAttribute>
             (STUN_ATTR_XOR_MAPPED_ADDRESS, remote_candidate().address));
+    // 4 + 20
     response.add_message_integrity(_port->ice_pwd());
+    // 4 + 4
     response.add_fingerprint();
 
     send_response_message(response);

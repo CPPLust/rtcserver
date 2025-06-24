@@ -138,6 +138,9 @@
     <ClCompile Include="src\ice\stun_request.cpp">
       <Filter>源文件\ICE</Filter>
     </ClCompile>
+    <ClCompile Include="src\pc\dtls_transport.cpp">
+      <Filter>源文件\pc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\base\conf.h">
@@ -247,6 +250,9 @@
     </ClInclude>
     <ClInclude Include="src\ice\ice_connection_info.h">
       <Filter>源文件\ICE</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pc\dtls_transport.h">
+      <Filter>源文件\pc</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

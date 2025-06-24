@@ -1,4 +1,4 @@
-#include <absl/algorithm/container.h>
+ï»¿#include <absl/algorithm/container.h>
 #include <rtc_base/logging.h>
 
 #include "ice/ice_credentials.h"
@@ -64,7 +64,7 @@ std::string PeerConnection::create_offer(const RTCOfferAnswerOptions& options) {
     if (options.recv_audio) {
         auto audio = std::make_shared<AudioContentDescription>();
         audio->set_direction(get_direction(options.send_audio, options.recv_audio));
-        //ÊÇ·ñrtpºÍrtcpÒ»¸öÍ¨µÀ
+        //æ˜¯å¦rtpå’Œrtcpä¸€ä¸ªé€šé“
         audio->set_rtcp_mux(options.use_rtcp_mux);
         _local_desc->add_content(audio);
         _local_desc->add_transport_info(audio->mid(), ice_param, _certificate);
@@ -80,11 +80,11 @@ std::string PeerConnection::create_offer(const RTCOfferAnswerOptions& options) {
     if (options.use_rtp_mux) {
         ContentGroup offer_bundle("BUNDLE");
         for (auto content : _local_desc->contents()) {
-            //ÎªÁË¸øÒôÊÓÆµ¶¼Ìí¼Óbundle»úÖÆ
+            //ä¸ºäº†ç»™éŸ³è§†é¢‘éƒ½æ·»åŠ bundleæœºåˆ¶
             offer_bundle.add_content_name(content->mid());
         }
 
-        //Èç¹ûÓÐÌí¼ÓÌõÄ¿£¬ Òª°ÑÌõÄ¿ÉèÖÃ¸øsession description
+        //å¦‚æžœæœ‰æ·»åŠ æ¡ç›®ï¼Œ è¦æŠŠæ¡ç›®è®¾ç½®ç»™session description
         if (!offer_bundle.content_names().empty()) {
             _local_desc->add_group(offer_bundle);
         }

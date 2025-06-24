@@ -1,5 +1,6 @@
-#include <rtc_base/logging.h>
+﻿#include <rtc_base/logging.h>
 
+#include "pc/dtls_transport.h"
 #include "pc/transport_controller.h"
 
 namespace xrtc {
@@ -30,7 +31,7 @@ int TransportController::set_local_description(SessionDescription* desc) {
         return -1;
     }
     
-    //content��ĵ�һ����ȥ����
+    //content里的第一个会去创建
     for (auto content : desc->contents()) {
         std::string mid = content->mid();
         if (desc->is_bundle(mid) && mid != desc->get_first_bundle_mid()) {
@@ -43,11 +44,27 @@ int TransportController::set_local_description(SessionDescription* desc) {
             _ice_agent->set_ice_params(mid, IceCandidateComponent::RTP,
                     IceParameters(td->ice_ufrag, td->ice_pwd));
         }
+
+        //创建dtls 
+        DtlsTransport* dtls = new DtlsTransport(
+                _ice_agent->get_channel(mid, IceCandidateComponent::RTP));
+        _add_dtls_transport(dtls);
     }
     
     _ice_agent->gathering_candidate();
 
     return 0;
+}
+
+void TransportController::_add_dtls_transport(DtlsTransport* dtls) {
+    //判断是否存在
+    auto iter = _dtls_transport_by_name.find(dtls->transport_name());
+    if (iter != _dtls_transport_by_name.end()) {
+        //存在则删除
+        delete iter->second;
+    }
+
+    _dtls_transport_by_name[dtls->transport_name()] = dtls;
 }
 
 int TransportController::set_remote_description(SessionDescription* desc) {

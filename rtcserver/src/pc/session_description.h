@@ -1,4 +1,4 @@
-
+ï»¿
 #ifndef  __SESSION_DESCRIPTION_H_
 #define  __SESSION_DESCRIPTION_H_
 
@@ -14,8 +14,8 @@
 namespace xrtc {
 
 enum class SdpType {
-    k_offer = 0,//ÍÆÁ÷À´µÄÊÇoffer
-    k_answer = 1, //·µ»ØµÄÊÇanswer
+    k_offer = 0,//æ¨æµæ¥çš„æ˜¯offer
+    k_answer = 1, //è¿”å›çš„æ˜¯answer
 };
 
 enum class MediaType {
@@ -65,7 +65,7 @@ public:
     MediaType type() override { return MediaType::MEDIA_TYPE_VIDEO; }
     std::string mid() override { return "video"; }
 };
-//ÄÚÈİ·Ö×é
+//å†…å®¹åˆ†ç»„
 class ContentGroup {
 public:
     ContentGroup(const std::string& semantics) : _semantics(semantics) {}
@@ -77,8 +77,8 @@ public:
     void add_content_name(const std::string& content_name);
 
 private:
-    std::string _semantics; //ÆäÊµ¾ÍÊÇ×éµÄÃû×Ö£¬ÒªÆğ¸öÓĞÒâÒåÒ»µãµÄ£¬ËüµÄÓïÒå
-    std::vector<std::string> _content_names; //´æÁËÄÄĞ©Ãû×Ö
+    std::string _semantics; //å…¶å®å°±æ˜¯ç»„çš„åå­—ï¼Œè¦èµ·ä¸ªæœ‰æ„ä¹‰ä¸€ç‚¹çš„ï¼Œå®ƒçš„è¯­ä¹‰
+    std::vector<std::string> _content_names; //å­˜äº†å“ªäº›åå­—
 };
 enum ConnectionRole {
     NONE = 0,
@@ -102,7 +102,7 @@ public:
  
     std::shared_ptr<MediaContentDescription> get_content(const std::string& mid);
     void add_content(std::shared_ptr<MediaContentDescription> content);
-    //»ñÈ¡µ±Ç°µÄËùÓĞµÄmĞĞ 
+    //è·å–å½“å‰çš„æ‰€æœ‰çš„mè¡Œ 
     const std::vector<std::shared_ptr<MediaContentDescription>>& contents() const {
         return _contents;
     }
@@ -122,7 +122,7 @@ public:
 private:
     SdpType _sdp_type;
     std::vector<std::shared_ptr<MediaContentDescription>> _contents;
-	//´æÁËÄÄĞ©×é
+	//å­˜äº†å“ªäº›ç»„
     std::vector<ContentGroup> _content_groups;
     std::vector<std::shared_ptr<TransportDescription>> _transport_infos;
 };

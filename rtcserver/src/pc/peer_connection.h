@@ -1,4 +1,4 @@
-#ifndef  __PEER_CONNECTION_H_
+ï»¿#ifndef  __PEER_CONNECTION_H_
 #define  __PEER_CONNECTION_H_
 
 #include <string>
@@ -17,9 +17,9 @@ struct RTCOfferAnswerOptions {
     bool send_video = true;
     bool recv_audio = true;
     bool recv_video = true;
-	//ÓÉÓÃ»§×Ô¼ºÈ¥¾ö¶¨ÊÇ·ñÊ¹ÓÃbundle»úÖÆ£¬Êµ¼Ê¾ÍÊÇÍ¨µÀ¸´ÓÃ
+	//ç”±ç”¨æˆ·è‡ªå·±å»å†³å®šæ˜¯å¦ä½¿ç”¨bundleæœºåˆ¶ï¼Œå®é™…å°±æ˜¯é€šé“å¤ç”¨
     bool use_rtp_mux = true;
-	//ÊÇ·ñrtpºÍrtcpÒ»¸öÍ¨µÀ
+	//æ˜¯å¦rtpå’Œrtcpä¸€ä¸ªé€šé“
     bool use_rtcp_mux = true;
     bool dtls_on = true;
 };

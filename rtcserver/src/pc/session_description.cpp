@@ -1,4 +1,4 @@
-
+ï»¿
 
 #include <sstream>
 
@@ -7,18 +7,18 @@
 
 namespace xrtc {
 
-//¸úä¯ÀÀÆ÷´ò½»µÀ±ØĞë¼ÓÃÜ
+//è·Ÿæµè§ˆå™¨æ‰“äº¤é“å¿…é¡»åŠ å¯†
 const char k_media_protocol_dtls_savpf[] = "UDP/TLS/RTP/SAVPF";
 
 const char k_meida_protocol_savpf[] = "RTP/SAVPF";
 AudioContentDescription::AudioContentDescription() {
-    //Ìí¼ÓÒôÆµµÄ±à½âÂëĞÅÏ¢
+    //æ·»åŠ éŸ³é¢‘çš„ç¼–è§£ç ä¿¡æ¯
     auto codec = std::make_shared<AudioCodecInfo>();
     codec->id = 111;
     codec->name = "opus";
     codec->clockrate = 48000;
     codec->channels = 2;
-    //Transport-wide Congestion Control  ´«ÊäÓµÈû¿ØÖÆ
+    //Transport-wide Congestion Control  ä¼ è¾“æ‹¥å¡æ§åˆ¶
     // add feedback param
     codec->feedback_param.push_back(FeedbackParam("transport-cc"));
     // add codec param
@@ -34,16 +34,16 @@ VideoContentDescription::VideoContentDescription() {
     codec->clockrate = 90000;
 
     // add feedback param
- //»ùÓÚ½ÓÊÕ¶Ë¹À¼ÆµÄ×î´ó±ÈÌØÂÊµÄ·´À¡»úÖÆ
+ //åŸºäºæ¥æ”¶ç«¯ä¼°è®¡çš„æœ€å¤§æ¯”ç‰¹ç‡çš„åé¦ˆæœºåˆ¶
     codec->feedback_param.push_back(FeedbackParam("goog-remb"));
     codec->feedback_param.push_back(FeedbackParam("transport-cc"));
-    //ccm Codec Control Message Fast Image Refresh  iÖ¡ÇëÇó
+    //ccm Codec Control Message Fast Image Refresh  iå¸§è¯·æ±‚
     codec->feedback_param.push_back(FeedbackParam("ccm", "fir"));
 
     codec->feedback_param.push_back(FeedbackParam("nack"));
     //Picture Loss Indication
     codec->feedback_param.push_back(FeedbackParam("nack", "pli"));
-    //fir ºÍ pli µÄÇø±ğÔÚÓÚfir ±ØĞë·¢IÖ¡£¬ pliÊÇ¸æËßÎÒ¶ªÁËÒ»Ğ©Ö¡£¬ ½¨ÒéÄã·¢iÖ¡
+    //fir å’Œ pli çš„åŒºåˆ«åœ¨äºfir å¿…é¡»å‘Iå¸§ï¼Œ pliæ˜¯å‘Šè¯‰æˆ‘ä¸¢äº†ä¸€äº›å¸§ï¼Œ å»ºè®®ä½ å‘iå¸§
 	
 	// add codec param
     codec->codec_param["level-asymmetry-allowed"] = "1";
@@ -54,7 +54,7 @@ VideoContentDescription::VideoContentDescription() {
 
  
 	
-    //ÖØ´«°ü Ò»ÖÖĞÂµÄÀàĞÍ
+    //é‡ä¼ åŒ… ä¸€ç§æ–°çš„ç±»å‹
     auto rtx_codec = std::make_shared<VideoCodecInfo>();
     rtx_codec->id = 99;
     rtx_codec->name = "rtx";
@@ -172,13 +172,13 @@ std::shared_ptr<TransportDescription> SessionDescription::get_transport_info(
     return nullptr;
 }
 bool SessionDescription::is_bundle(const std::string& mid) {
-    //²éÕÒµ±Ç°ÊÇ²»ÊÇÓÖbundle×é
+    //æŸ¥æ‰¾å½“å‰æ˜¯ä¸æ˜¯åˆbundleç»„
     auto content_group = get_group_by_name("BUNDLE");
     if (content_group.empty()) {
         return false;
     }
 
-    //ÓĞbundle×é£¬ ²éÕÒµ±Ç°ÊÇ²»ÊÇÓĞmid ¼´ video/audio
+    //æœ‰bundleç»„ï¼Œ æŸ¥æ‰¾å½“å‰æ˜¯ä¸æ˜¯æœ‰mid å³ video/audio
     for (auto group : content_group) {
         for (auto name : group->content_names()) {
             if (name == mid) {
@@ -196,7 +196,7 @@ std::string SessionDescription::get_first_bundle_mid() {
         return "";
     }
     
-    //¼òµ¥µÄÊµÏÖ£¬Õâ¸ö¿ÉÒÔ¸Ä
+    //ç®€å•çš„å®ç°ï¼Œè¿™ä¸ªå¯ä»¥æ”¹
     return content_group[0]->content_names()[0];
 }
 static void add_rtcp_fb_line(std::shared_ptr<CodecInfo> codec,
@@ -235,7 +235,7 @@ static void build_rtp_map(std::shared_ptr<MediaContentDescription> content,
         }
         ss << "\r\n";
 
-        add_rtcp_fb_line(codec, ss); //Ã¿¸ömĞĞ¶¼ÒªÔö¼Órtcp feedback£¬ Ò²¾ÍÊÇÃ¿¸öcodec
+        add_rtcp_fb_line(codec, ss); //æ¯ä¸ªmè¡Œéƒ½è¦å¢åŠ rtcp feedbackï¼Œ ä¹Ÿå°±æ˜¯æ¯ä¸ªcodec
         add_fmtp_line(codec, ss);
     }
 }
@@ -275,7 +275,7 @@ static void build_candidates(std::shared_ptr<MediaContentDescription> content,
 
 std::string SessionDescription::to_string() {
     std::stringstream ss;
-    // version ÕâÊÇ°æ±¾
+    // version è¿™æ˜¯ç‰ˆæœ¬
     ss << "v=0\r\n";
 	// session origin
 	// RFC 4566
@@ -296,7 +296,7 @@ std::string SessionDescription::to_string() {
                 ss << " " << content_name;
             }
         }
-        //×îºó×·¼ÓÒ»¸ö\r\n
+        //æœ€åè¿½åŠ ä¸€ä¸ª\r\n
         ss << "\r\n";
     }
     ss << "a=msid-semantic: WMS\r\n";
@@ -330,12 +330,12 @@ std::string SessionDescription::to_string() {
             }
         }
         ss << "a=mid:" << content->mid() << "\r\n";
-        build_rtp_direction(content, ss); //ÉèÖÃ´«Êä·½Ïò
+        build_rtp_direction(content, ss); //è®¾ç½®ä¼ è¾“æ–¹å‘
 
-        if (content->rtcp_mux()) { //ÉèÖÃrtpºÍrtcpÊÇ·ñÓÃÒ»¸öÍ¨µÀ´«Êä
+        if (content->rtcp_mux()) { //è®¾ç½®rtpå’Œrtcpæ˜¯å¦ç”¨ä¸€ä¸ªé€šé“ä¼ è¾“
             ss << "a=rtcp-mux\r\n";
         }
-        build_rtp_map(content, ss); //rtpmap ±àÂëĞÅÏ¢ ±ÈÌØÂÊÉùµÀ
+        build_rtp_map(content, ss); //rtpmap ç¼–ç ä¿¡æ¯ æ¯”ç‰¹ç‡å£°é“
     }
 
 
