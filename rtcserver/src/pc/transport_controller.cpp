@@ -98,6 +98,7 @@ int TransportController::set_remote_description(SessionDescription* desc) {
                     IceParameters(td->ice_ufrag, td->ice_pwd));
             auto dtls = _get_dtls_transport(mid);
             if (dtls) {
+                //获取到的dtls
                 dtls->set_remote_fingerprint(td->identity_fingerprint->algorithm,
                         td->identity_fingerprint->digest.cdata(),
                         td->identity_fingerprint->digest.size());
