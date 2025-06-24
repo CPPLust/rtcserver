@@ -31,7 +31,8 @@ public:
     void set_ice_params(const IceParameters& ice_params);
     void set_remote_ice_params(const IceParameters& ice_params);
     void gathering_candidate();
-    
+    int send_packet(const char* data, size_t len);
+
     std::string to_string();
 
     sigslot::signal2<IceTransportChannel*, const std::vector<Candidate>&>

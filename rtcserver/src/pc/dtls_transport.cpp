@@ -70,11 +70,17 @@ rtc::StreamResult StreamInterfaceChannel::Write(const void* data,
         size_t* written,
         int* error) 
 {
+    _ice_channel->send_packet((const char*)data, data_len);
+    if (written) {
+        *written = data_len;
+    }
+
     return rtc::SR_SUCCESS;
 }
 
 void StreamInterfaceChannel::Close() {
-
+    _state = rtc::SS_CLOSED;
+    _packets.Clear();
 }
 
 DtlsTransport::DtlsTransport(IceTransportChannel* ice_channel) :
@@ -114,6 +120,20 @@ void DtlsTransport::_on_read_packet(IceTransportChannel* /*channel*/,
                     << "dropping";
             }
 
+            break;
+        case DtlsTransportState::k_connecting:
+        case DtlsTransportState::k_connected:
+            if (is_dtls_packet(buf, len)) { // Dtls包
+                if (!_handle_dtls_packet(buf, len)) {
+                    RTC_LOG(LS_WARNING) << to_string() << ": handle DTLS packet failed";
+                    return;
+                }
+            } else { // RTP/RTCP包
+                //todo
+            }
+
+            break;
+       default:
             break;
     }
 }
@@ -221,7 +241,7 @@ void DtlsTransport::_set_dtls_state(DtlsTransportState state) {
     }
 
     RTC_LOG(LS_INFO) << to_string() << ": Change dtls state from " << _dtls_state
-        << "to " << state;
+        << " to " << state;
     _dtls_state = state;
     signal_dtls_state(this, state);
 }
