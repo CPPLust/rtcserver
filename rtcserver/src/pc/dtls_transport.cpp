@@ -77,6 +77,7 @@ rtc::StreamResult StreamInterfaceChannel::Write(const void* data,
         size_t* written,
         int* error) 
 {
+    RTC_LOG(LS_INFO) << "+++++++++++++++++++++++++++++Write StreamInterfaceChannel";
     _ice_channel->send_packet((const char*)data, data_len);
     if (written) {
         *written = data_len;
