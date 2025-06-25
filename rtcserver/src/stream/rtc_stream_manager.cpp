@@ -1,4 +1,4 @@
-#include "stream/rtc_stream_manager.h"
+﻿#include "stream/rtc_stream_manager.h"
 #include <rtc_base/logging.h>
 #include "base/conf.h"
 #include "stream/push_stream.h"
@@ -25,6 +25,23 @@ PushStream* RtcStreamManager::find_push_stream(const std::string& stream_name) {
 
     return nullptr;
 }
+
+void RtcStreamManager::remove_push_stream(RtcStream* stream) {
+    if (!stream) {
+        return;
+    }
+
+    remove_push_stream(stream->get_uid(), stream->get_stream_name());
+}
+
+void RtcStreamManager::remove_push_stream(uint64_t uid, const std::string& stream_name) {
+    PushStream* push_stream = find_push_stream(stream_name);
+    if (push_stream && uid == push_stream->get_uid()) {
+        _push_streams.erase(stream_name);
+        delete push_stream;
+    }
+}
+
 int RtcStreamManager::create_push_stream(uint64_t uid, const std::string& stream_name,
         bool audio, bool video, uint32_t log_id,
         rtc::RTCCertificate* certificate,
@@ -38,6 +55,7 @@ int RtcStreamManager::create_push_stream(uint64_t uid, const std::string& stream
 
     stream = new PushStream(_el, _allocator.get(), uid, stream_name,
             audio, video, log_id);
+    stream->register_listener(this);
     stream->start(certificate);
     offer = stream->create_offer();
     _push_streams[stream_name] = stream;
@@ -71,6 +89,22 @@ int RtcStreamManager::set_answer(uint64_t uid, const std::string& stream_name,
     }
     return 0;
 }
+
+int RtcStreamManager::stop_push(uint64_t uid, const std::string& stream_name) {
+    remove_push_stream(uid, stream_name);
+    return 0;
+}
+
+void RtcStreamManager::on_connection_state(RtcStream* stream, 
+        PeerConnectionState state)
+{
+    if (state == PeerConnectionState::k_failed) {
+        if (stream->stream_type() == RtcStreamType::k_push) {
+            remove_push_stream(stream);
+        }
+    }
+}
+
 } // namespace xrtc
 
 

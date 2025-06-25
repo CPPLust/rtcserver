@@ -1,4 +1,4 @@
-#ifndef  __RTC_STREAM_MANAGER_H_
+ï»¿#ifndef  __RTC_STREAM_MANAGER_H_
 #define  __RTC_STREAM_MANAGER_H_
 
 #include <string>
@@ -8,16 +8,17 @@
 
 #include "ice/port_allocator.h"
 #include "base/event_loop.h"
+#include "stream/rtc_stream.h"
 
 namespace xrtc {
 
-//¹ÜÀíËùÓĞµÄÍÆÁ÷ºÍÀ­Á÷»á»° 
-//¿ØÖÆÁ÷Ö®¼äµÄÊı¾İ×ª·¢ 
+//ç®¡ç†æ‰€æœ‰çš„æ¨æµå’Œæ‹‰æµä¼šè¯ 
+//æ§åˆ¶æµä¹‹é—´çš„æ•°æ®è½¬å‘ 
 
 
 class PushStream;
 
-class RtcStreamManager {
+class RtcStreamManager : public RtcStreamListener {
 public:
     RtcStreamManager(EventLoop* el);
     ~RtcStreamManager();
@@ -29,8 +30,13 @@ public:
     int set_answer(uint64_t uid, const std::string& stream_name,
             const std::string& answer, const std::string& stream_type, 
             uint32_t log_id);
+    int stop_push(uint64_t uid, const std::string& stream_name);
 
     PushStream* find_push_stream(const std::string& stream_name);
+    void remove_push_stream(RtcStream* stream);
+    void remove_push_stream(uint64_t uid, const std::string& stream_name);
+
+    void on_connection_state(RtcStream* stream, PeerConnectionState state) override;
 
 private:
     EventLoop* _el;

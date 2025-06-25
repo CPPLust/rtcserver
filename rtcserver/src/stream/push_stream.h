@@ -1,4 +1,4 @@
-
+﻿
 #ifndef  __PUSH_STREAM_H_
 #define  __PUSH_STREAM_H_
 
@@ -14,6 +14,7 @@ public:
     ~PushStream() override;
 
     std::string create_offer() override;
+    RtcStreamType stream_type() override { return RtcStreamType::k_push; }
 };
 
 } // namespace xrtc

@@ -1,4 +1,5 @@
-
+﻿
+#include <rtc_base/logging.h>
 
 #include "stream/push_stream.h"
 
@@ -13,6 +14,7 @@ PushStream::PushStream(EventLoop* el, PortAllocator* allocator,
 }
 
 PushStream::~PushStream() {
+    RTC_LOG(LS_INFO) << to_string() << ": Push stream destroy.";
 }
 
 std::string PushStream::create_offer() {
