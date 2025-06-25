@@ -24,15 +24,22 @@ PeerConnection::PeerConnection(EventLoop* el, PortAllocator* allocator) :
 {
     _transport_controller->signal_candidate_allocate_done.connect(this,
             &PeerConnection::on_candidate_allocate_done);
+    _transport_controller->signal_connection_state.connect(this,
+            &PeerConnection::_on_connection_state);
 }
 
 PeerConnection::~PeerConnection() {
-
+    if (_destroy_timer) {
+        _el->delete_timer(_destroy_timer);
+        _destroy_timer = nullptr;
+    }
+    
+    RTC_LOG(LS_INFO) << "PeerConnection destroy";
 }
 
-void PeerConnection::on_candidate_allocate_done(TransportController* transport_controller,
+void PeerConnection::on_candidate_allocate_done(TransportController* /*transport_controller*/,
         const std::string& transport_name,
-        IceCandidateComponent component,
+        IceCandidateComponent /*component*/,
         const std::vector<Candidate>& candidates)
 {
     for (auto c : candidates) {
@@ -49,11 +56,32 @@ void PeerConnection::on_candidate_allocate_done(TransportController* transport_c
         content->add_candidates(candidates);
     }
 }
+
+void PeerConnection::_on_connection_state(TransportController*, PeerConnectionState state) {
+    signal_connection_state(this, state);
+}
+
 int PeerConnection::init(rtc::RTCCertificate* certificate) {
     _certificate = certificate;
     _transport_controller->set_local_certificate(certificate);
     return 0;
 }
+
+void destroy_timer_cb(EventLoop* /*el*/, TimerWatcher* /*w*/, void* data) {
+    PeerConnection* pc = (PeerConnection*)data;
+    delete pc;
+}
+
+void PeerConnection::destroy() {
+    if (_destroy_timer) {
+        _el->delete_timer(_destroy_timer);
+        _destroy_timer = nullptr;
+    }
+
+    _destroy_timer = _el->create_timer(destroy_timer_cb, this, false);
+    _el->start_timer(_destroy_timer, 10000); // 10ms
+}
+
 std::string PeerConnection::create_offer(const RTCOfferAnswerOptions& options) {
     if (options.dtls_on && !_certificate) {
         RTC_LOG(LS_WARNING) << "certificate is null";

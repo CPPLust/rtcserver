@@ -84,6 +84,7 @@
     <ClInclude Include="src\pc\codec_info.h" />
     <ClInclude Include="src\pc\dtls_transport.h" />
     <ClInclude Include="src\pc\peer_connection.h" />
+    <ClInclude Include="src\pc\peer_connection_def.h" />
     <ClInclude Include="src\pc\session_description.h" />
     <ClInclude Include="src\pc\transport_controller.h" />
     <ClInclude Include="src\server\rtc_server.h" />

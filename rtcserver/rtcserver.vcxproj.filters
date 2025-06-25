@@ -263,5 +263,8 @@
     <ClInclude Include="src\pc\dtls_transport.h">
       <Filter>源文件\pc</Filter>
     </ClInclude>
+    <ClInclude Include="src\pc\peer_connection_def.h">
+      <Filter>源文件\pc</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -55,7 +55,7 @@ rtc::StreamState StreamInterfaceChannel::GetState() const {
 rtc::StreamResult StreamInterfaceChannel::Read(void* buffer,
         size_t buffer_len,
         size_t* read,
-        int* error)
+        int* /*error*/)
 {
     if (_state == rtc::SS_CLOSED) {
         return rtc::SR_EOS;
@@ -75,7 +75,7 @@ rtc::StreamResult StreamInterfaceChannel::Read(void* buffer,
 rtc::StreamResult StreamInterfaceChannel::Write(const void* data,
         size_t data_len,
         size_t* written,
-        int* error) 
+        int* /*error*/) 
 {
     RTC_LOG(LS_INFO) << "+++++++++++++++++++++++++++++Write StreamInterfaceChannel";
     _ice_channel->send_packet((const char*)data, data_len);
@@ -96,6 +96,7 @@ DtlsTransport::DtlsTransport(IceTransportChannel* ice_channel) :
 {
     _ice_channel->signal_read_packet.connect(this, &DtlsTransport::_on_read_packet);
     _ice_channel->signal_writable_state.connect(this, &DtlsTransport::_on_writable_state);
+    _ice_channel->signal_receiving_state.connect(this, &DtlsTransport::_on_receiving_state);
 
     webrtc::CryptoOptions crypto_options;
     _srtp_ciphers = crypto_options.GetSupportedDtlsSrtpCryptoSuites();
@@ -157,7 +158,7 @@ void DtlsTransport::_on_read_packet(IceTransportChannel* /*channel*/,
             }
 
             break;
-        defalut:
+        default:
             break;
     }
 }
@@ -183,6 +184,19 @@ void DtlsTransport::_on_writable_state(IceTransportChannel* channel) {
     }
 }
 
+void DtlsTransport::_on_receiving_state(IceTransportChannel* channel) {
+    _set_receiving(channel->receiving());
+}
+
+void DtlsTransport::_set_receiving(bool receiving) {
+    if (_receiving == receiving) {
+        return;
+    }
+
+    RTC_LOG(LS_INFO) << to_string() << ": Change receiving to " << receiving;
+    _receiving = receiving;
+    signal_receiving_state(this);
+}
 bool DtlsTransport::set_local_certificate(rtc::RTCCertificate* cert) {
     if (_dtls_active) {
         //
@@ -325,8 +339,7 @@ bool DtlsTransport::_setup_dtls() {
     return true;
 }
 
-void DtlsTransport::_on_dtls_event(rtc::StreamInterface* dtls, int sig, int error) {
-    //说明dtls握手成功了
+void DtlsTransport::_on_dtls_event(rtc::StreamInterface* /*dtls*/, int sig, int error) {
     if (sig & rtc::SE_OPEN) {
         RTC_LOG(LS_INFO) << to_string() << ": DTLS handshake complete.";
         //设置dtls成功
@@ -342,19 +355,13 @@ void DtlsTransport::_on_dtls_event(rtc::StreamInterface* dtls, int sig, int erro
         // 因为一个数据包可能会包含多个DTLS record，需要循环读取
         do {
             ret = _dtls->Read(buf, sizeof(buf), &read, &read_error);
-            if (ret == rtc::SR_SUCCESS) 
-            {
-                //todo
-            } 
-            else if (ret == rtc::SR_EOS) 
-            {
+            if (ret == rtc::SR_SUCCESS) {
+            } else if (ret == rtc::SR_EOS) {
                 RTC_LOG(LS_INFO) << to_string() << ": DTLS transport closed by remote.";
                 _set_writable_state(false);
                 _set_dtls_state(DtlsTransportState::k_closed);
                 signal_closed(this);
-            }
-            else if (ret == rtc::SR_ERROR) 
-            {
+            } else if (ret == rtc::SR_ERROR) {
                 RTC_LOG(LS_WARNING) << to_string() << ": Closed DTLS transport by remote "
                     << "with error, code=" << read_error;
                 _set_writable_state(false);

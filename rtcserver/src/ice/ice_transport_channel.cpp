@@ -33,6 +33,20 @@ IceTransportChannel::~IceTransportChannel() {
         _el->delete_timer(_ping_watcher);
         _ping_watcher = nullptr;
     }
+    
+    std::vector<IceConnection*> connections = _ice_controller->connections();
+    for (auto conn : connections) {
+        conn->destroy();
+    }
+
+    for (auto port : _ports) {
+        delete port;
+    }
+    _ports.clear();
+
+    _ice_controller.reset(nullptr);
+
+    RTC_LOG(LS_INFO) << to_string() << ": IceTransportChannel destroy";
 }
 
 void IceTransportChannel::set_ice_params(const IceParameters& ice_params) {
@@ -78,6 +92,8 @@ void IceTransportChannel::gathering_candidate() {
         UDPPort* port = new UDPPort(_el, _transport_name, _component, _ice_params);
         port->signal_unknown_address.connect(this,
                 &IceTransportChannel::_on_unknown_address);
+        
+        _ports.push_back(port);
 
         Candidate c;
         int ret = port->create_ice_candidate(network, _allocator->min_port(), 
@@ -147,6 +163,9 @@ void IceTransportChannel::_add_connection(IceConnection* conn) {
             &IceTransportChannel::_on_connection_destroyed);
     conn->signal_read_packet.connect(this,
             &IceTransportChannel::_on_read_packet);
+    
+    _had_connection = true;
+    
     _ice_controller->add_connection(conn);
 }
 
@@ -186,6 +205,10 @@ void IceTransportChannel::_set_writable(bool writable) {
     if (_writable == writable) {
         return;
     }
+    
+    if (writable) {
+        _has_been_connection = true;
+    }
 
     _writable = writable;
     RTC_LOG(LS_INFO) << to_string() << ": Change writable to " << _writable;
@@ -214,6 +237,40 @@ void IceTransportChannel::_update_state() {
         }
     }
     _set_receiving(receiving);
+
+    IceTransportState state = _compute_ice_transport_state();
+    if (state != _state) {
+        _state = state;
+        signal_ice_state_changed(this);
+    }
+}
+
+IceTransportState IceTransportChannel::_compute_ice_transport_state() {
+    bool has_connection = false;
+    for (auto conn : _ice_controller->connections()) {
+        if (conn->active()) {
+            has_connection = true;
+            break;
+        }
+    }
+
+    if (_had_connection && !has_connection) {
+        return IceTransportState::k_failed;
+    }
+
+    if (_has_been_connection && !writable()) {
+        return IceTransportState::k_disconnected;
+    }
+
+    if (!_had_connection && !has_connection) {
+        return IceTransportState::k_new;
+    }
+    
+    if (has_connection && !writable()) {
+        return IceTransportState::k_checking;
+    }
+
+    return IceTransportState::k_connected;
 }
 
 void IceTransportChannel::_maybe_switch_selected_connection(IceConnection* conn) {
