@@ -1,4 +1,4 @@
-
+ï»¿
 #include "server/rtc_server.h"
 #include "server/rtc_worker.h"
 
@@ -112,7 +112,7 @@ int RtcServer::init(const char* conf_file) {
 	notify_addr_in.sin_family = AF_INET;
 	inet_pton(AF_INET, "127.0.0.1", &notify_addr_in.sin_addr);
 	notify_addr_in.sin_port = htons(19000);
-	// ½«recv_fdÌí¼Óµ½ÊÂ¼þÑ­»·£¬½øÐÐ¹ÜÀí
+	// å°†recv_fdæ·»åŠ åˆ°äº‹ä»¶å¾ªçŽ¯ï¼Œè¿›è¡Œç®¡ç†
 	_pipe_watcher = _el->create_io_event(rtc_server_recv_notify, this);
 	_el->start_io_event(_pipe_watcher, _notify_send_fd, EventLoop::READ);
 #else

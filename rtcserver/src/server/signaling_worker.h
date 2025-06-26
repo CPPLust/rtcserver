@@ -1,4 +1,4 @@
-#ifndef  __SIGNALING_WORKER_H_
+﻿#ifndef  __SIGNALING_WORKER_H_
 #define  __SIGNALING_WORKER_H_
 
 #include <thread>

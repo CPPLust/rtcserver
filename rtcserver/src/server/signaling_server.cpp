@@ -1,4 +1,4 @@
-#include <rtc_base/logging.h>
+ï»¿#include <rtc_base/logging.h>
 #include <yaml-cpp/yaml.h>
 
 #include "server/signaling_worker.h"
@@ -106,11 +106,11 @@ int SignalingServer::init(const char* conf_file) {
     notify_addr_in.sin_family = AF_INET;
     inet_pton(AF_INET, "127.0.0.1", &notify_addr_in.sin_addr);
     notify_addr_in.sin_port = htons(18000);
-	// ½«recv_fdÌí¼Óµ½ÊÂ¼þÑ­»·£¬½øÐÐ¹ÜÀí
+	// å°†recv_fdæ·»åŠ åˆ°äº‹ä»¶å¾ªçŽ¯ï¼Œè¿›è¡Œç®¡ç†
 	_pipe_watcher = _el->create_io_event(signaling_server_recv_notify, this);
 	_el->start_io_event(_pipe_watcher, _notify_send_fd, EventLoop::READ);
 #else
-	//´´½¨¹ÜµÀ
+	//åˆ›å»ºç®¡é“
 	int fds[2];
 	if (pipe(fds))
 	{
@@ -120,13 +120,13 @@ int SignalingServer::init(const char* conf_file) {
 
 	_notify_recv_fd = fds[0];
 	_notify_send_fd = fds[1];
-	//½«fdÌí¼Óµ½ÊÂ¼þÑ­»·µ±ÖÐ½øÐÐ¹ÜÀí
+	//å°†fdæ·»åŠ åˆ°äº‹ä»¶å¾ªçŽ¯å½“ä¸­è¿›è¡Œç®¡ç†
 	_pipe_watcher = _el->create_io_event(signaling_server_recv_notify, this);
 	_el->start_io_event(_pipe_watcher, _notify_recv_fd, EventLoop::READ);
 #endif
 	
   
-    // ´´½¨tcp server
+    // åˆ›å»ºtcp server
     _listen_fd = create_tcp_server(_options.host.c_str(), _options.port); 
     if (-1 == _listen_fd) {
 		RTC_LOG(LS_WARNING) << "create_tcp_server error: " << strerror(errno) << ", errno: " << errno;

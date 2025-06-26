@@ -1,4 +1,4 @@
-
+ï»¿
 #include <rtc_base/logging.h>
 #include "server/signaling_worker.h"
 #include "server/rtc_worker.h"
@@ -143,7 +143,7 @@ bool RtcWorker::pop_msg(std::shared_ptr<RtcMsg>* msg) {
 }
 
 int RtcWorker::send_rtc_msg(std::shared_ptr<RtcMsg> msg) {
-    // ½«ÏûÏ¢Í¶µİµ½workerµÄ¶ÓÁĞ
+    // å°†æ¶ˆæ¯æŠ•é€’åˆ°workerçš„é˜Ÿåˆ—
     push_msg(msg);
     return notify(RTC_MSG);
 }
@@ -173,7 +173,28 @@ void RtcWorker::_process_push(std::shared_ptr<RtcMsg> msg) {
             offer);
     
     
-    RTC_LOG(LS_INFO) << "create_push_stream ++++++++++++offer: " << offer;
+    RTC_LOG(LS_INFO) << "offer: " << offer;
+
+    msg->sdp = offer;
+    if (ret != 0) {
+        msg->err_no = -1;
+    }
+
+    SignalingWorker* worker = (SignalingWorker*)(msg->worker);
+    if (worker) {
+        worker->send_rtc_msg(msg);
+    }
+}
+
+void RtcWorker::_process_pull(std::shared_ptr<RtcMsg> msg) {
+    std::string offer;
+    int ret = _rtc_stream_mgr->create_pull_stream(msg->uid, msg->stream_name,
+            msg->audio, msg->video, msg->log_id, 
+            (rtc::RTCCertificate*)(msg->certificate),
+            offer);
+
+
+    RTC_LOG(LS_INFO) << "offer: " << offer;
     msg->sdp = offer;
     if (ret != 0) {
         msg->err_no = -1;
@@ -222,6 +243,9 @@ void RtcWorker::_process_rtc_msg() {
     switch (msg->cmdno) {
         case CMDNO_PUSH:
             _process_push(msg);
+            break;
+        case CMDNO_PULL:
+            _process_pull(msg);
             break;
         case CMDNO_STOPPUSH:
             _process_stop_push(msg);

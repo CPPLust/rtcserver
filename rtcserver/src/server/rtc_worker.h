@@ -1,4 +1,4 @@
-#ifndef  __RTC_WORKER_H_
+﻿#ifndef  __RTC_WORKER_H_
 #define  __RTC_WORKER_H_
 
 #include <thread>

@@ -1,4 +1,4 @@
-#ifndef  __RTC_SERVER_H_
+ï»¿#ifndef  __RTC_SERVER_H_
 #define  __RTC_SERVER_H_
 
 #include <thread>
@@ -45,7 +45,7 @@ private:
     void _process_rtc_msg();
     int _create_worker(int worker_id);
 
-    //¸Ãº¯ÊıµÄÖ÷ÒªÄ¿µÄÊÇÎªÁËÍ¬Ò»¸öÁ÷ÔÚÏàÍ¬µÄworkerÉÏ, ÕâÑùÀ­Á÷¸öÍÆÁ÷¶¼ÔÚÒ»¸öworkerÉÏ,ºÃ¹ÜÀíÊı¾İ
+    //è¯¥å‡½æ•°çš„ä¸»è¦ç›®çš„æ˜¯ä¸ºäº†åŒä¸€ä¸ªæµåœ¨ç›¸åŒçš„workerä¸Š, è¿™æ ·æ‹‰æµä¸ªæ¨æµéƒ½åœ¨ä¸€ä¸ªworkerä¸Š,å¥½ç®¡ç†æ•°æ®
     RtcWorker* _get_worker(const std::string& stream_name);
     int _generate_and_check_certificate();
 

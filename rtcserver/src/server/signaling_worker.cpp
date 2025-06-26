@@ -1,4 +1,4 @@
-
+Ôªø
 #include <rtc_base/logging.h>
 
 #include "xrtcserver_def.h"
@@ -149,7 +149,7 @@ void SignalingWorker::_stop() {
 }
 void SignalingWorker::_response_server_offer(std::shared_ptr<RtcMsg> msg) {
 
-    //’‚∂Œ «≈–∂œ∫œ∑®–‘
+    //ËøôÊÆµÊòØÂà§Êñ≠ÂêàÊ≥ïÊÄß
     TcpConnection* c = (TcpConnection*)(msg->conn);
     if (!c) {
         return;
@@ -162,7 +162,7 @@ void SignalingWorker::_response_server_offer(std::shared_ptr<RtcMsg> msg) {
     if (_conns[fd] != c) {
         return;
     }
-    // ππ‘ÏœÏ”¶Õ∑
+    // ÊûÑÈÄ†ÂìçÂ∫îÂ§¥
     xhead_t* xh = (xhead_t*)(c->querybuf);
     rtc::Slice header(c->querybuf, XHEAD_SIZE);
     char* buf = (char*)malloc(XHEAD_SIZE + MAX_RES_BUF);
@@ -192,7 +192,7 @@ void SignalingWorker::_response_server_offer(std::shared_ptr<RtcMsg> msg) {
     res_xh->body_len = json_data.size();
     snprintf(buf + XHEAD_SIZE, MAX_RES_BUF, "%s", json_data.c_str());
 
-    //ππΩ®“ª∏ˆ◊™∑¢ ˝æ›
+    //ÊûÑÂª∫‰∏Ä‰∏™ËΩ¨ÂèëÊï∞ÊçÆ
     rtc::Slice reply(buf, XHEAD_SIZE + res_xh->body_len);
     _add_reply(c, reply);
 }
@@ -281,7 +281,7 @@ void SignalingWorker::_write_reply(int fd) {
             RTC_LOG(LS_WARNING) << "write zero bytes, fd: " << c->fd
                 << ", worker_id: " << _worker_id;
         } else if ((nwritten + c->cur_resp_pos) >= reply.size()) {
-            // –¥»ÎÕÍ≥…
+            // ÂÜôÂÖ•ÂÆåÊàê
             c->reply_list.pop_front();
             free((void*)reply.data());
             c->cur_resp_pos = 0;
@@ -375,7 +375,7 @@ int SignalingWorker::_process_query_buffer(TcpConnection* c) {
     while (sdslen(c->querybuf) >= c->bytes_processed + c->bytes_expected) {
         xhead_t* head = (xhead_t*)(c->querybuf);
         if (TcpConnection::STATE_HEAD == c->current_state) {
-            //∂¡Õ∑
+            //ËØªÂ§¥
             if (XHEAD_MAGIC_NUM != head->magic_num) {
                 RTC_LOG(LS_WARNING) << "invalid data, fd: " << c->fd;
                 return -1;
@@ -385,17 +385,17 @@ int SignalingWorker::_process_query_buffer(TcpConnection* c) {
             c->bytes_processed = XHEAD_SIZE;
             c->bytes_expected = head->body_len;
         } else {
-            //∂¡ ˝æ›ÃÂ
-            rtc::Slice header(c->querybuf, XHEAD_SIZE); //πÃ∂®36◊÷Ω⁄µƒ¥Û–°
-            rtc::Slice body(c->querybuf + XHEAD_SIZE, head->body_len); //∆´“∆36∏ˆ◊÷Ω⁄µƒ¥Û–°
+            //ËØªÊï∞ÊçÆ‰Ωì
+            rtc::Slice header(c->querybuf, XHEAD_SIZE); //Âõ∫ÂÆö36Â≠óËäÇÁöÑÂ§ßÂ∞è
+            rtc::Slice body(c->querybuf + XHEAD_SIZE, head->body_len); //ÂÅèÁßª36‰∏™Â≠óËäÇÁöÑÂ§ßÂ∞è
 
             int ret = _process_request(c, header, body);
             if (ret != 0) {
                 return -1;
             }
 
-            // ∂Ã¡¨Ω”¥¶¿Ì   ∫Û√Êµƒ ˝æ›æÕ≤ª¥¶¿Ì¡À£¨ “ÚŒ™À˚√«µƒ «∂Ã¡¥Ω”µƒ«Î«Û
-            //»Áπ˚≥§¡¥Ω”£¨ø…ƒ‹“™∏ƒ±‰◊¥Ã¨
+            // Áü≠ËøûÊé•Â§ÑÁêÜ   ÂêéÈù¢ÁöÑÊï∞ÊçÆÂ∞±‰∏çÂ§ÑÁêÜ‰∫ÜÔºå Âõ†‰∏∫‰ªñ‰ª¨ÁöÑÊòØÁü≠ÈìæÊé•ÁöÑËØ∑Ê±Ç
+            //Â¶ÇÊûúÈïøÈìæÊé•ÔºåÂèØËÉΩË¶ÅÊîπÂèòÁä∂ÊÄÅ
             c->bytes_processed = 65535;
         }
     }
@@ -442,7 +442,7 @@ int SignalingWorker::_process_request(TcpConnection* c,
             RTC_LOG(LS_WARNING) << "unknown cmdno: " << cmdno << ", log_id: " << xh->log_id;
             break;
     }
-    // ∑µªÿ¥¶¿ÌΩ·π˚
+    // ËøîÂõûÂ§ÑÁêÜÁªìÊûú
     char* buf = (char*)malloc(XHEAD_SIZE + MAX_RES_BUF);
     xhead_t* res_xh = (xhead_t*)buf;
     memcpy(res_xh, header.data(), header.size());
