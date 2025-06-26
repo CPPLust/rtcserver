@@ -23,6 +23,10 @@ type comHttpResp struct {
 	Data interface{} `json:"data"`
 }
 
+func writeHtmlErrorResponse(w http.ResponseWriter, status int, err string) {
+	w.WriteHeader(status)
+	w.Write([]byte(err))
+}
 
 func  writeJsonErrorResponse(cerr *comerrors.Errors, w http.ResponseWriter,
 			cr * framework.ComRequest) {

@@ -36,6 +36,7 @@ void RtcStreamManager::remove_push_stream(RtcStream* stream) {
 
 void RtcStreamManager::remove_push_stream(uint64_t uid, const std::string& stream_name) {
     PushStream* push_stream = find_push_stream(stream_name);
+    //判断是否相同
     if (push_stream && uid == push_stream->get_uid()) {
         _push_streams.erase(stream_name);
         delete push_stream;

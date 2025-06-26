@@ -41,7 +41,9 @@ function startPush() {
 function stopPush() {
     console.log("send stop push: /signaling/stoppush");
 
+    //本地的窗口
     localVideo.srcObject = null;
+    //音视频的track
     if (localStream && localStream.getAudioTracks()) {
         localStream.getAudioTracks()[0].stop();
     }

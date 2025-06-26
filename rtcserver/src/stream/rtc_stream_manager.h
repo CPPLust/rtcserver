@@ -30,10 +30,12 @@ public:
     int set_answer(uint64_t uid, const std::string& stream_name,
             const std::string& answer, const std::string& stream_type, 
             uint32_t log_id);
+    //停止推流
     int stop_push(uint64_t uid, const std::string& stream_name);
 
     PushStream* find_push_stream(const std::string& stream_name);
     void remove_push_stream(RtcStream* stream);
+    //重载的删除 给信令服务器过来的
     void remove_push_stream(uint64_t uid, const std::string& stream_name);
 
     void on_connection_state(RtcStream* stream, PeerConnectionState state) override;

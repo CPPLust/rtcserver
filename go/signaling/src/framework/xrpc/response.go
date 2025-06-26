@@ -16,8 +16,8 @@ func ReadResponse(r io.Reader)(resp* Response, err error) {
 		return nil, err
 	}
 
-	if resp.Header.MagicNum != HEADER_MAGICNUM  {
-		return nil, fmt.Errorf("invalid magic num: %x", resp.Header.MagicNum);
+	if resp.Header.MagicNum != HEADER_MAGICNUM {
+		return nil, fmt.Errorf("invalid magic num: %x", resp.Header.MagicNum)
 	}
 
 	resp.Body= make([]byte , resp.Header.BodyLen)
