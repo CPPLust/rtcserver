@@ -1,10 +1,10 @@
 package framework
 
 import (
+	"fmt"
 	"math/rand"
 	"signaling/src/glog"
 	"time"
-	"fmt"
 )
 
 func init() {
@@ -45,7 +45,7 @@ func (l * ComLog) TimeBegin(field string) {
 		beginTime:time.Now().UnixNano() /1000,
 	}
 
-	l.timeLog = append(l.timeLog, item);
+	l.timeLog = append(l.timeLog, item)
 }
 
 func (l * ComLog) TimeEnd(field string) {

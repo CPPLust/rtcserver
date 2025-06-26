@@ -2,8 +2,10 @@
 
 var localVideo = document.getElementById("localVideo");
 var pushBtn = document.getElementById("pushBtn");
+var stopPushBtn = document.getElementById("stopPushBtn");
 
 pushBtn.addEventListener("click", startPush);
+stopPushBtn.addEventListener("click", stopPush);
 
 var uid = $("#uid").val();
 var streamName = $("#streamName").val();
@@ -33,7 +35,42 @@ function startPush() {
 			}
 		},
 		"json"
-	);
+    );
+}
+
+function stopPush() {
+    console.log("send stop push: /signaling/stoppush");
+
+    localVideo.srcObject = null;
+    if (localStream && localStream.getAudioTracks()) {
+        localStream.getAudioTracks()[0].stop();
+    }
+
+    if (localStream && localStream.getVideoTracks()) {
+        localStream.getVideoTracks()[0].stop();
+    }
+
+    if (pc) {
+        pc.close();
+        pc = null;
+    }
+
+    $("#tips1").html("");
+    $("#tips2").html("");
+    $("#tips3").html("");
+
+    $.post("/signaling/stoppush",
+        {"uid": uid, "streamName": streamName},
+        function(data, textStatus) {
+            console.log("stop push response: " + JSON.stringify(data));
+            if ("success" == textStatus && 0 == data.errNo) {
+                $("#tips1").html("<font color='blue'>停止推流请求成功!</font>");
+            } else {
+                $("#tips1").html("<font color='red'>停止推流请求失败!</font>");
+            }
+        },
+        "json"
+    );
 }
 
 function sendAnswer(answerSdp) {

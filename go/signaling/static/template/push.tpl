@@ -2,8 +2,8 @@
 
 <html>
 <head>
-	<meta charset="utf-8">
-	<title>1v1 屏幕共享推流端</title>
+    <meta charset="utf-8">
+    <title>1v1屏幕共享-推流端</title>
 
 	<style type="text/css">
 		body{

@@ -18,7 +18,7 @@ enum class RtcStreamType {
     k_push,
     k_pull
 };
-
+//监听状态使用
 class RtcStreamListener {
 public:
     //监听状态使用
@@ -42,9 +42,12 @@ public:
     void register_listener(RtcStreamListener* listener) { _listener = listener; }
 
     virtual std::string create_offer() = 0;
+    //返回当前流的类型
     virtual RtcStreamType stream_type() = 0;
     
+    //推流的uid
     uint64_t get_uid() { return uid; }
+    //流名字
     const std::string& get_stream_name() { return stream_name; }
     
     std::string to_string();

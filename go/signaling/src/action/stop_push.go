@@ -9,26 +9,24 @@ import (
 	"strconv"
 )
 
-type sendAnswerAction struct{}
+type stopPushAction struct{}
 
-func NewSendAnswerAction() *sendAnswerAction {
-	return &sendAnswerAction{}
+func NewStopPushAction() *stopPushAction {
+	return &stopPushAction{}
 }
 
-type xrtcSendAnswerReq struct {
+type xrtcStopPushReq struct {
 	Cmdno      int    `json:"cmdno"`
 	Uid        uint64 `json:"uid"`
 	StreamName string `json:"stream_name"`
-	Answer     string `json:"answer"`
-	Type       string `json:"type"`
 }
 
-type xrtcSendAnswerResp struct {
+type xrtcStopPushResp struct {
 	ErrNo  int    `json:"err_no"`
 	ErrMsg string `json:"err_msg"`
 }
 
-func (*sendAnswerAction) Execute(w http.ResponseWriter, cr *framework.ComRequest) {
+func (*stopPushAction) Execute(w http.ResponseWriter, cr *framework.ComRequest) {
 	r := cr.R
 
 	// uid
@@ -56,39 +54,13 @@ func (*sendAnswerAction) Execute(w http.ResponseWriter, cr *framework.ComRequest
 		return
 	}
 
-	// answer
-	var answer string
-	if values, ok := r.Form["answer"]; ok {
-		answer = values[0]
-	}
-
-	if "" == answer {
-		cerr := comerrors.New(comerrors.ParamErr, "answer is null")
-		writeJsonErrorResponse(cerr, w, cr)
-		return
-	}
-
-	// type
-	var strType string
-	if values, ok := r.Form["type"]; ok {
-		strType = values[0]
-	}
-
-	if "" == strType {
-		cerr := comerrors.New(comerrors.ParamErr, "strType is null")
-		writeJsonErrorResponse(cerr, w, cr)
-		return
-	}
-
-	req := xrtcSendAnswerReq{
-		Cmdno:      CMDNO_ANSWER,
+	req := xrtcStopPushReq{
+		Cmdno:      CMDNO_STOP_PUSH,
 		Uid:        uid,
 		StreamName: streamName,
-		Answer:     answer,
-		Type:       strType,
 	}
 
-	var resp xrtcSendAnswerResp
+	var resp xrtcStopPushResp
 
 	err = framework.Call("xrtc", req, &resp, cr.LogId)
 	if err != nil {

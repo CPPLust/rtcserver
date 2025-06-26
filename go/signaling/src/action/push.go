@@ -3,12 +3,12 @@ package action
 
 
 import (
-	"fmt"
-	"strconv"
-	"net/http"
-	"signaling/src/framework"
-	"signaling/src/comerrors"
 	"encoding/json"
+	"fmt"
+	"net/http"
+	"signaling/src/comerrors"
+	"signaling/src/framework"
+	"strconv"
 )
 
 
@@ -37,7 +37,7 @@ type pushData struct {
 	Sdp  string `json:"sdp"`
 }
 
-func (*pushAction) Excute(w http.ResponseWriter, cr * framework.ComRequest) {
+func (*pushAction) Execute(w http.ResponseWriter, cr *framework.ComRequest) {
 	r := cr.R
 
 	//uid 
@@ -66,7 +66,7 @@ func (*pushAction) Excute(w http.ResponseWriter, cr * framework.ComRequest) {
 		return
 	}
 
-	
+	// audio video
 	var strAudio, strVideo string
 	var audio, video int
 
@@ -106,8 +106,8 @@ func (*pushAction) Excute(w http.ResponseWriter, cr * framework.ComRequest) {
 	fmt.Printf("%+v\n", resp)
 
 	if err != nil {
-		cerr:=comerrors.New(comerrors.NetworkErr, "backend process err:" + err.Error())
-		writeJsonErrorResponse(cerr,w, cr)
+		cerr := comerrors.New(comerrors.NetworkErr, "backend process error:"+err.Error())
+		writeJsonErrorResponse(cerr, w, cr)
 		return
 	}
 
@@ -129,11 +129,7 @@ func (*pushAction) Excute(w http.ResponseWriter, cr * framework.ComRequest) {
 		},
 	}
 
-	b , _  := json.Marshal(httpResp)
-	cr.Logger.AddNotice("resp",string(b));
-
-	w.Write(b);
-
-
-
+	b, _ := json.Marshal(httpResp)
+	cr.Logger.AddNotice("resp", string(b))
+	w.Write(b)
 }

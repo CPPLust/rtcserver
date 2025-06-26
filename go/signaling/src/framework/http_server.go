@@ -3,8 +3,8 @@ package framework
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 	"signaling/src/glog"
+	"strconv"
 )
 
 func init() {
@@ -12,7 +12,7 @@ func init() {
 }
 
 type ActionInterface interface {
-	Excute(w http.ResponseWriter,cr * ComRequest)
+	Execute(w http.ResponseWriter, cr *ComRequest)
 }
 
 var GActionRouter map[string]ActionInterface = make(map[string] ActionInterface)
@@ -76,11 +76,11 @@ func entry(w http.ResponseWriter,r *http.Request) {
 			}
 			
 			cr.Logger.TimeBegin("totalCost")
-			action.Excute(w,cr)
+			action.Execute(w, cr)
 			cr.Logger.TimeEnd("totalCost")
 			cr.Logger.Infof("")
 		} else {
-			responseError(w, r, http.StatusInternalServerError, "Internal server err")
+			responseError(w, r, http.StatusInternalServerError, "Internal server error")
 		}
 	} else {
 		responseError(w, r, http.StatusNotFound, "Not found")
@@ -94,15 +94,12 @@ func RegisterStaticUrl() {
 }
 
 func StartHttp() error {
-	//fmt.Println("start http")
-	glog.Infof("start http server on port :%s",gconf.httpPort);
-
-	return http.ListenAndServe(gconf.httpPort,nil)
+	glog.Infof("start http server on port:%d", gconf.httpPort)
+	return http.ListenAndServe(fmt.Sprintf(":%d", gconf.httpPort), nil)
 }
-func StartHttps() error {
-	//fmt.Println("start http")
-	glog.Infof("start https server on port :%s",gconf.httpsPort);
 
-	return http.ListenAndServeTLS(gconf.httpsPort,
-	gconf.httpsCert, gconf.httpsKey,nil)
+func StartHttps() error {
+	glog.Infof("start https server on port:%d", gconf.httpsPort)
+	return http.ListenAndServeTLS(fmt.Sprintf(":%d", gconf.httpsPort),
+		gconf.httpsCert, gconf.httpsKey, nil)
 }

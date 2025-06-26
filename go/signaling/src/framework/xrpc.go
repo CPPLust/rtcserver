@@ -1,13 +1,14 @@
 package framework
 
 import (
-	"fmt"
-	"strings"
- 	"errors"
-	"time"
-	"strconv"
-	"encoding/json"
 	"bytes"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	"signaling/src/framework/xrpc"
 )
 
@@ -67,11 +68,11 @@ func loadXrpc() error {
 	return nil
 }
 
-func Call(serviceName string, request interface{}, response interface{}, logId uint32) error {
-	fmt.Println("call " + serviceName )
-	
-	client, ok := xrpcClients["xrpc." + serviceName]
-	
+func Call(serviceName string, request interface{}, response interface{},
+	logId uint32) error {
+	fmt.Println("call " + serviceName)
+
+	client, ok := xrpcClients["xrpc."+serviceName]
 	if !ok {
 		return fmt.Errorf("[%s] service not found",serviceName)
 	}

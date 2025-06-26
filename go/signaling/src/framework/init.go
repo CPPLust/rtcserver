@@ -25,7 +25,7 @@ func Init(confFile string) error {
 
 	err = loadXrpc()
 	if err != nil {
-		return err;
+		return err
 	}
 
 	return nil

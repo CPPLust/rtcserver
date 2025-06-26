@@ -39,6 +39,7 @@ IceTransportChannel::~IceTransportChannel() {
         conn->destroy();
     }
 
+    //创建的port要清空
     for (auto port : _ports) {
         delete port;
     }

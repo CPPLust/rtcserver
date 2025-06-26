@@ -1,9 +1,9 @@
 package xrpc
 
 import (
-	"io"
-	"errors"
 	"encoding/binary"
+	"errors"
+	"io"
 )
 
 const (
@@ -21,28 +21,13 @@ type Header struct {
 	BodyLen  uint32
 }
 
-func (h * Header) UnMarshal(b []byte) error {
-	if len(b) < HEADER_SIZE {
-		return errors.New("incomplete header")
-	}
-
-	h.Id = binary.LittleEndian.Uint16(b[0:2]);
-	h.Version = binary.LittleEndian.Uint16(b[2:4]);
-	h.LogId = binary.LittleEndian.Uint32(b[4:8]);
-	copy(h.Provider[:], b[8:24])
-	h.MagicNum = binary.LittleEndian.Uint32(b[24:28]);
-	h.Reserved = binary.LittleEndian.Uint32(b[28:32]);
-	h.BodyLen = binary.LittleEndian.Uint32(b[32:36]);
-
-	return nil
-}
-func (h* Header) Marsha1(b []byte) error {
+func (h *Header) Marshal(b []byte) error {
 	if len(b) < HEADER_SIZE {
 		return errors.New("no enough buffer for header")
 	}
-	
+
 	binary.LittleEndian.PutUint16(b[0:2], h.Id)
-	binary.LittleEndian.PutUint16(b[0:4], h.Version)
+	binary.LittleEndian.PutUint16(b[2:4], h.Version)
 	binary.LittleEndian.PutUint32(b[4:8], h.LogId)
 	copy(b[8:24], h.Provider[:])
 	binary.LittleEndian.PutUint32(b[24:28], h.MagicNum)
@@ -50,16 +35,29 @@ func (h* Header) Marsha1(b []byte) error {
 	binary.LittleEndian.PutUint32(b[32:36], h.BodyLen)
 
 	return nil
-
 }
 
+func (h *Header) UnMarshal(b []byte) error {
+	if len(b) < HEADER_SIZE {
+		return errors.New("incomplete header")
+	}
 
-func (h* Header) Write(w io.Writer ) (n int, err error) {
+	h.Id = binary.LittleEndian.Uint16(b[0:2])
+	h.Version = binary.LittleEndian.Uint16(b[2:4])
+	h.LogId = binary.LittleEndian.Uint32(b[4:8])
+	copy(h.Provider[:], b[8:24])
+	h.MagicNum = binary.LittleEndian.Uint32(b[24:28])
+	h.Reserved = binary.LittleEndian.Uint32(b[28:32])
+	h.BodyLen = binary.LittleEndian.Uint32(b[32:36])
+
+	return nil
+}
+
+func (h *Header) Write(w io.Writer) (n int, err error) {
 	var buf [HEADER_SIZE]byte
-	
-	if err = h.Marsha1(buf[:]); err != nil {
-		return  0, err
-	} 
+	if err = h.Marshal(buf[:]); err != nil {
+		return 0, err
+	}
 
 	return w.Write(buf[:])
 }

@@ -52,6 +52,7 @@ private:
     std::unique_ptr<SessionDescription> _remote_desc;
     rtc::RTCCertificate* _certificate = nullptr;
     std::unique_ptr<TransportController> _transport_controller;
+    //目的是销毁使用
     TimerWatcher* _destroy_timer = nullptr;
 };
 
