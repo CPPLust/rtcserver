@@ -14,11 +14,6 @@ func NewXrtcClientPushAction() *xrtcClientPushAction {
 	return &xrtcClientPushAction{}
 }
 
-func writeHtmlErrorResponse(w http.ResponseWriter, status int, err string) {
-	w.WriteHeader(status)
-	w.Write([]byte(err))
-}
-
 func (*xrtcClientPushAction) Execute(w http.ResponseWriter, cr *framework.ComRequest) {
 	r := cr.R
 
