@@ -150,6 +150,9 @@
     <ClCompile Include="..\3rdpart\libwebrtc\src\system_wrappers\source\field_trial.cc">
       <Filter>源文件\libwebrtc\system_wrappers</Filter>
     </ClCompile>
+    <ClCompile Include="src\stream\pull_stream.cpp">
+      <Filter>源文件\stream</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\base\conf.h">
@@ -265,6 +268,9 @@
     </ClInclude>
     <ClInclude Include="src\pc\peer_connection_def.h">
       <Filter>源文件\pc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stream\pull_stream.h">
+      <Filter>源文件\stream</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
