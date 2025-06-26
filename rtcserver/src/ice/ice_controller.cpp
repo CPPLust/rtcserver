@@ -19,9 +19,13 @@ void IceController::on_connection_destroyed(IceConnection* conn) {
     _unpinged_connections.erase(conn);
     
     auto iter = _connections.begin();
-    for (; iter != _connections.end(); ++iter) {
+    for (; iter != _connections.end(); ) {
         if (*iter == conn) {
-            _connections.erase(iter);
+            iter = _connections.erase(iter);
+        }
+        else
+        {
+            ++iter;
         }
     }
 }

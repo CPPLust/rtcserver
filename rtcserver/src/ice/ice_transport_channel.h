@@ -17,6 +17,7 @@ namespace xrtc {
 
 class UDPPort;
 
+//ice的状态
 enum class IceTransportState {
     k_new,
     k_checking,
@@ -38,6 +39,7 @@ public:
     IceCandidateComponent component() { return _component; }
     bool writable() { return _writable; }
     bool receiving() { return _receiving; }
+    //返回状态
     IceTransportState state() { return _state; }
 
     void set_ice_params(const IceParameters& ice_params);
@@ -79,6 +81,7 @@ private:
     void _update_state();
     void _set_receiving(bool receiving);
     void _set_writable(bool writable);
+
     IceTransportState _compute_ice_transport_state();
 
     friend void ice_ping_cb(EventLoop* /*el*/, TimerWatcher* /*w*/, void* data);
@@ -101,8 +104,11 @@ private:
     IceConnection* _selected_connection = nullptr;
     bool _receiving = false;
     bool _writable = false;
+    //ice的状态
     IceTransportState _state = IceTransportState::k_new;
+    //表示是否创建过链接
     bool _had_connection = false;
+    //表示链接是否成功链接过
     bool _has_been_connection = false;
 };
 

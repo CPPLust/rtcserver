@@ -57,6 +57,7 @@ int TransportController::set_local_description(SessionDescription* desc) {
         DtlsTransport* dtls = new DtlsTransport(
                 _ice_agent->get_channel(mid, IceCandidateComponent::RTP));
         dtls->set_local_certificate(_local_certificate);
+        //各种状态
         dtls->signal_receiving_state.connect(this, 
                 &TransportController::_on_dtls_receiving_state);
         dtls->signal_receiving_state.connect(this, 
@@ -96,6 +97,7 @@ void TransportController::_update_state() {
     std::map<IceTransportState, int> ice_state_counts;
     auto iter = _dtls_transport_by_name.begin();
     for (; iter != _dtls_transport_by_name.end(); ++iter) {
+        //dtls各个状态的个数
         dtls_state_counts[iter->second->dtls_state()]++;
         ice_state_counts[iter->second->ice_channel()->state()]++;
     }

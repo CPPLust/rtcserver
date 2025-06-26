@@ -12,6 +12,7 @@ RtcStream::RtcStream(EventLoop* el, PortAllocator* allocator,
     video(video), log_id(log_id),
     pc(new PeerConnection(el, allocator))
 {
+    //底层的消息变化告诉流
     pc->signal_connection_state.connect(this, &RtcStream::_on_connection_state);
 }
 

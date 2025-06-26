@@ -21,6 +21,7 @@ enum class RtcStreamType {
 
 class RtcStreamListener {
 public:
+    //监听状态使用
     virtual void on_connection_state(RtcStream* stream, PeerConnectionState state) = 0;
 };
 	

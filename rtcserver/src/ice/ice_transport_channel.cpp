@@ -207,6 +207,7 @@ void IceTransportChannel::_set_writable(bool writable) {
     }
     
     if (writable) {
+        //可以链接
         _has_been_connection = true;
     }
 
@@ -253,15 +254,16 @@ IceTransportState IceTransportChannel::_compute_ice_transport_state() {
             break;
         }
     }
-
+    //状态计算
     if (_had_connection && !has_connection) {
         return IceTransportState::k_failed;
     }
-
+    //曾经建立过，但是现在不可写
     if (_has_been_connection && !writable()) {
         return IceTransportState::k_disconnected;
     }
 
+    //也没有链接也没有
     if (!_had_connection && !has_connection) {
         return IceTransportState::k_new;
     }
