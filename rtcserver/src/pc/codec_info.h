@@ -1,4 +1,4 @@
-#ifndef  __CODEC_INFO_H_
+ï»¿#ifndef  __CODEC_INFO_H_
 #define  __CODEC_INFO_H_
 
 #include <string>
@@ -31,8 +31,8 @@ public:
 
 public:
     int id; //id  webrtc pt  payload type id
-    std::string name; //Ãû×Ö
-    int clockrate; //ÆµÂÊ
+    std::string name; //åå­—
+    int clockrate; //é¢‘ç‡
     std::vector<FeedbackParam> feedback_param;
     CodecParam codec_param;
 };

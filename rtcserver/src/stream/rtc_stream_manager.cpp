@@ -101,10 +101,18 @@ int RtcStreamManager::create_pull_stream(uint64_t uid, const std::string& stream
     }
     
     _remove_pull_stream(uid, stream_name);
+    
+    std::vector<StreamParams> audio_source; //获取推流的音频源
+    std::vector<StreamParams> video_source;//获取推流的视频源
+
+    push_stream->get_audio_source(audio_source);
+    push_stream->get_video_source(video_source);
 
     PullStream* stream = new PullStream(_el, _allocator.get(), uid, stream_name,
             audio, video, log_id);
     stream->register_listener(this);
+    stream->add_audio_source(audio_source);
+    stream->add_video_source(video_source);
     stream->start(certificate);
     offer = stream->create_offer();
     
@@ -135,7 +143,23 @@ int RtcStreamManager::set_answer(uint64_t uid, const std::string& stream_name,
         push_stream->set_remote_sdp(answer);
 
     } else if ("pull" == stream_type) {
+        //拉流返回的answer
+        PullStream* pull_stream = _find_pull_stream(stream_name);
+        if (!pull_stream) {
+            RTC_LOG(LS_WARNING) << "pull stream not found, uid: " << uid
+                << ", stream_name: " << stream_name
+                << ", log_id: " << log_id;
+            return -1;
+        }
 
+        if (uid != pull_stream->uid) {
+            RTC_LOG(LS_WARNING) << "uid invalid, uid: " << uid
+                << ", stream_name: " << stream_name
+                << ", log_id: " << log_id;
+            return -1;
+        }
+
+        pull_stream->set_remote_sdp(answer);
     }
     return 0;
 }

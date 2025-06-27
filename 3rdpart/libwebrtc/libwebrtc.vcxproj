@@ -509,7 +509,6 @@
     <ClCompile Include="src\rtc_base\stream.cc" />
     <ClCompile Include="src\rtc_base\strings\json.cc" />
     <ClCompile Include="src\rtc_base\strings\string_builder.cc" />
-    <ClCompile Include="src\rtc_base\string_to_number.cc" />
     <ClCompile Include="src\rtc_base\string_utils.cc" />
     <ClCompile Include="src\rtc_base\synchronization\mutex.cc" />
     <ClCompile Include="src\rtc_base\synchronization\sequence_checker_internal.cc" />

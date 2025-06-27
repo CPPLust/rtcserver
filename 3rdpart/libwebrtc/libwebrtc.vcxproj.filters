@@ -402,9 +402,6 @@
     <ClCompile Include="src\rtc_base\stream.cc">
       <Filter>源文件\src\rtc_base</Filter>
     </ClCompile>
-    <ClCompile Include="src\rtc_base\string_to_number.cc">
-      <Filter>源文件\src\rtc_base</Filter>
-    </ClCompile>
     <ClCompile Include="src\rtc_base\string_utils.cc">
       <Filter>源文件\src\rtc_base</Filter>
     </ClCompile>

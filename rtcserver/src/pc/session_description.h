@@ -11,6 +11,8 @@
 #include "ice/ice_credentials.h"
 #include "ice/candidate.h"
 #include "pc/codec_info.h"
+#include "pc/stream_params.h"
+
 namespace xrtc {
 
 enum class SdpType {
@@ -45,12 +47,18 @@ public:
     void add_candidates(const std::vector<Candidate>& candidates) {
         _candidates = candidates;
     }
+    const std::vector<StreamParams>& streams() { return _send_streams; }
+    //把流id添加到content里
+    void add_stream(const StreamParams& stream) {
+        _send_streams.push_back(stream);
+    }
 
 protected:
     std::vector<std::shared_ptr<CodecInfo>> _codecs;
     RtpDirection _direction;
     bool _rtcp_mux = true;
     std::vector<Candidate> _candidates;
+    std::vector<StreamParams> _send_streams;
 };
 class AudioContentDescription : public MediaContentDescription {
 public:
