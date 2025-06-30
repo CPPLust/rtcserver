@@ -20,6 +20,35 @@ bool SrtpSession::set_send(int cs, const uint8_t* key, size_t key_len,
     return _set_key(ssrc_any_outbound, cs, key, key_len, extension_ids);
 }
 
+bool SrtpSession::update_send(int cs, const uint8_t* key, size_t key_len,
+        const std::vector<int>& extension_ids)
+{
+    return _update_key(ssrc_any_outbound, cs, key, key_len, extension_ids);
+}
+
+bool SrtpSession::set_recv(int cs, const uint8_t* key, size_t key_len,
+        const std::vector<int>& extension_ids)
+{
+    return _set_key(ssrc_any_outbound, cs, key, key_len, extension_ids);
+}
+
+bool SrtpSession::update_recv(int cs, const uint8_t* key, size_t key_len,
+        const std::vector<int>& extension_ids)
+{
+    return _update_key(ssrc_any_outbound, cs, key, key_len, extension_ids);
+}
+
+bool SrtpSession::_update_key(int type, int cs, const uint8_t* key, size_t key_len,
+        const std::vector<int>& extension_ids)
+{
+    if (!_session) {
+        RTC_LOG(LS_WARNING) << "Failed to update on non-existing SRTP session";
+        return false;
+    }
+
+    return _do_set_key(type, cs, key, key_len, extension_ids);
+}
+
 ABSL_CONST_INIT int g_libsrtp_usage_count = 0;
 ABSL_CONST_INIT webrtc::GlobalMutex g_libsrtp_lock(absl::kConstInit);
 
@@ -86,6 +115,58 @@ bool SrtpSession::_set_key(int type, int cs, const uint8_t* key, size_t key_len,
         return false;
     }
 
+    return _do_set_key(type, cs, key, key_len, extension_ids);
+}
+
+bool SrtpSession::_do_set_key(int type, int cs, const uint8_t* key, size_t key_len,
+        const std::vector<int>& /*extension_ids*/)
+{
+    srtp_policy_t policy; //策略
+    memset(&policy, 0, sizeof(policy));
+
+    bool rtp_ret = srtp_crypto_policy_set_from_profile_for_rtp(
+            &policy.rtp, (srtp_profile_t)cs);
+    bool rtcp_ret = srtp_crypto_policy_set_from_profile_for_rtcp(
+            &policy.rtcp, (srtp_profile_t)cs);
+    if (rtp_ret != srtp_err_status_ok || rtcp_ret != srtp_err_status_ok) {
+        RTC_LOG(LS_WARNING) << "SRTP session " << (_session ? "create" : "update")
+            << " failed: unsupported crypto suite " << cs;
+        return false;
+    }
+
+    if (!key || key_len != (size_t)policy.rtp.cipher_key_len) {
+        RTC_LOG(LS_WARNING) << "SRTP session " << (_session ? "create" : "update")
+            << " failed: invalid key";
+        return false;
+    }
+
+    policy.ssrc.type = (srtp_ssrc_type_t)type;
+    policy.ssrc.value = 0;
+    policy.key = (uint8_t*)key;
+    policy.window_size = 1024;
+    policy.allow_repeat_tx = 1;
+    policy.next = nullptr;
+
+    if (!_session) {
+        //没有创建
+        int err = srtp_create(&_session, &policy);
+        if (err != srtp_err_status_ok) {
+            RTC_LOG(LS_WARNING) << "Failed to create srtp, err: " << err;
+            _session = nullptr;
+            return false;
+        }
+        srtp_set_user_data(_session, this);
+    } else {
+        //更新
+        int err = srtp_update(_session, &policy);
+        if (err != srtp_err_status_ok) {
+            RTC_LOG(LS_WARNING) << "Failed to update srtp, err: " << err;
+            return false;
+        }
+    }
+
+    _rtp_auth_tag_len = policy.rtp.auth_tag_len;
+    _rtcp_auth_tag_len = policy.rtcp.auth_tag_len;
     return true;
 }
 

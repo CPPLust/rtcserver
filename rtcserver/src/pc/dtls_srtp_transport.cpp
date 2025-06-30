@@ -1,5 +1,7 @@
 ﻿#include <rtc_base/logging.h>
+#include <rtc_base/copy_on_write_buffer.h>
 
+#include "module/rtp_rtcp/rtp_utils.h"
 #include "pc/dtls_transport.h"
 #include "pc/dtls_srtp_transport.h"
 
@@ -20,6 +22,80 @@ void DtlsSrtpTransport::set_dtls_transports(DtlsTransport* rtp_dtls_transport,
 {
     _rtp_dtls_transport = rtp_dtls_transport;
     _rtcp_dtls_transport = rtcp_dtls_transport;
+    
+    if (_rtp_dtls_transport) {
+        _rtp_dtls_transport->signal_dtls_state.connect(this,
+                &DtlsSrtpTransport::_on_dtls_state);
+        _rtp_dtls_transport->signal_read_packet.connect(this,
+                &DtlsSrtpTransport::_on_read_packet);
+    }
+
+    _maybe_setup_dtls_srtp();
+}
+
+void DtlsSrtpTransport::_on_dtls_state(DtlsTransport* /*dtls*/,
+        DtlsTransportState state)
+{
+    if (state != DtlsTransportState::k_connected) {
+        reset_params();
+        return;
+    }
+
+    _maybe_setup_dtls_srtp();
+}
+
+void DtlsSrtpTransport::_on_read_packet(DtlsTransport* /*dtls*/,
+        const char* data, size_t len, int64_t ts)
+{
+    auto array_view = rtc::MakeArrayView(data, len);
+    RtpPacketType packet_type = infer_rtp_packet_type(array_view);
+
+    if (packet_type == RtpPacketType::k_unknown) {
+        return;
+    }
+
+    rtc::CopyOnWriteBuffer packet(data, len);
+    if (packet_type == RtpPacketType::k_rtcp) {
+        //_on_rtcp_packet_received(std::move(packet), ts);
+        RTC_LOG(LS_WARNING) << "============rtcp packet received: " << len;
+    } else {
+        //_on_rtp_packet_received(std::move(packet), ts);
+        RTC_LOG(LS_WARNING) << "============rtp packet received: " << len;
+    }
+}
+
+bool DtlsSrtpTransport::is_dtls_writable() {
+    //rtp 和rtcp 同时判断
+    auto rtcp_transport = _rtcp_mux_enabled ? nullptr : _rtcp_dtls_transport;
+    return _rtp_dtls_transport && _rtp_dtls_transport->writable() &&
+        (!rtcp_transport || rtcp_transport->writable());
+}
+
+void DtlsSrtpTransport::_maybe_setup_dtls_srtp() {
+    if (is_dtls_active() || !is_dtls_writable()) {
+        return;
+    }
+
+    _setup_dtls_srtp();
+}
+
+void DtlsSrtpTransport::_setup_dtls_srtp() {
+    std::vector<int> send_extension_ids; //这是扩展id
+    std::vector<int> recv_extension_ids;
+
+    int selected_crypto_suite;
+    rtc::ZeroOnFreeBuffer<unsigned char> send_key;
+    rtc::ZeroOnFreeBuffer<unsigned char> recv_key;
+
+    if (!_extract_params(_rtp_dtls_transport, &selected_crypto_suite,
+                &send_key, &recv_key) ||
+            !set_rtp_params(selected_crypto_suite,
+                &send_key[0], send_key.size(), send_extension_ids,
+                selected_crypto_suite,
+                &recv_key[0], recv_key.size(), recv_extension_ids))
+    {
+        RTC_LOG(LS_WARNING) << "DTLS-SRTP rtp param install failed";
+    }
 }
 
 bool DtlsSrtpTransport::_extract_params(DtlsTransport* dtls_transport,

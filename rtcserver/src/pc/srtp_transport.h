@@ -6,11 +6,13 @@
 #include <string>
 #include <vector>
 
+#include <rtc_base/third_party/sigslot/sigslot.h>
+
 #include "pc/srtp_session.h"
 
 namespace xrtc {
 
-class SrtpTransport {
+class SrtpTransport : public sigslot::has_slots<> {
 public:
     SrtpTransport(bool rtcp_mux_enabled);
     virtual ~SrtpTransport() = default;
@@ -25,11 +27,12 @@ public:
             size_t recv_key_len,
             const std::vector<int>& recv_extension_ids);
     void reset_params();
+    bool is_dtls_active();
 
 private:
     void _create_srtp_session();
 
-private:
+protected:
     bool _rtcp_mux_enabled;
     std::unique_ptr<SrtpSession> _send_session;
     std::unique_ptr<SrtpSession> _recv_session;

@@ -45,6 +45,7 @@
     <ClCompile Include="src\ice\stun_request.cpp" />
     <ClCompile Include="src\ice\udp_port.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\module\rtp_rtcp\rtp_utils.cpp" />
     <ClCompile Include="src\pc\dtls_srtp_transport.cpp" />
     <ClCompile Include="src\pc\dtls_transport.cpp" />
     <ClCompile Include="src\pc\peer_connection.cpp" />
@@ -87,6 +88,7 @@
     <ClInclude Include="src\ice\stun.h" />
     <ClInclude Include="src\ice\stun_request.h" />
     <ClInclude Include="src\ice\udp_port.h" />
+    <ClInclude Include="src\module\rtp_rtcp\rtp_utils.h" />
     <ClInclude Include="src\pc\codec_info.h" />
     <ClInclude Include="src\pc\dtls_srtp_transport.h" />
     <ClInclude Include="src\pc\dtls_transport.h" />

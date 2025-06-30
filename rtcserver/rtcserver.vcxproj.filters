@@ -37,6 +37,12 @@
     <Filter Include="源文件\libwebrtc\system_wrappers">
       <UniqueIdentifier>{92277e45-514c-436d-91cc-43c8a3d1b1c4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\moudle">
+      <UniqueIdentifier>{be576e88-84d5-4ce8-8c44-57b6d0acd8ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\moudle\rtp">
+      <UniqueIdentifier>{397084a4-f027-46c7-8cd0-ef0c549cadb0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp">
@@ -168,6 +174,9 @@
     <ClCompile Include="src\pc\srtp_session.cpp">
       <Filter>源文件\pc</Filter>
     </ClCompile>
+    <ClCompile Include="src\module\rtp_rtcp\rtp_utils.cpp">
+      <Filter>源文件\moudle\rtp</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\base\conf.h">
@@ -298,6 +307,9 @@
     </ClInclude>
     <ClInclude Include="src\pc\srtp_session.h">
       <Filter>源文件\pc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\module\rtp_rtcp\rtp_utils.h">
+      <Filter>源文件\moudle\rtp</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

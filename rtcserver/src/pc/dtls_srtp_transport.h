@@ -18,6 +18,7 @@ public:
     
     void set_dtls_transports(DtlsTransport* rtp_dtls_transport,
             DtlsTransport* rtcp_dtls_transport);
+    bool is_dtls_writable();
 
 private:
     //收集交换的密钥
@@ -25,6 +26,12 @@ private:
             int* selected_crypto_suite, //选择的套件 ， 用哪个加密
             rtc::ZeroOnFreeBuffer<unsigned char>* send_key,
             rtc::ZeroOnFreeBuffer<unsigned char>* recv_key);
+   
+    //安装dtls
+    void _maybe_setup_dtls_srtp();
+    void _setup_dtls_srtp();
+    void _on_dtls_state(DtlsTransport* dtls, DtlsTransportState state);
+    void _on_read_packet(DtlsTransport* dtls, const char* data, size_t len, int64_t ts);
 
 private:
     std::string _transport_name; //传输名字 
