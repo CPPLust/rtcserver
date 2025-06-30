@@ -49,6 +49,7 @@
     <ClCompile Include="src\pc\dtls_transport.cpp" />
     <ClCompile Include="src\pc\peer_connection.cpp" />
     <ClCompile Include="src\pc\session_description.cpp" />
+    <ClCompile Include="src\pc\srtp_session.cpp" />
     <ClCompile Include="src\pc\srtp_transport.cpp" />
     <ClCompile Include="src\pc\stream_params.cpp" />
     <ClCompile Include="src\pc\transport_controller.cpp" />
@@ -92,6 +93,7 @@
     <ClInclude Include="src\pc\peer_connection.h" />
     <ClInclude Include="src\pc\peer_connection_def.h" />
     <ClInclude Include="src\pc\session_description.h" />
+    <ClInclude Include="src\pc\srtp_session.h" />
     <ClInclude Include="src\pc\srtp_transport.h" />
     <ClInclude Include="src\pc\stream_params.h" />
     <ClInclude Include="src\pc\transport_controller.h" />
@@ -210,7 +212,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>yaml-cppd.lib;absl_base.lib;absl_strings.lib;absl_strerror.lib;absl_throw_delegate.lib;winmm.lib;ws2_32.lib;Iphlpapi.lib;Userenv.lib;DbgHelp.lib;jsoncpp_static.lib;libcrypto.lib;libssl.lib;Crypt32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>yaml-cppd.lib;absl_base.lib;absl_strings.lib;absl_strerror.lib;absl_throw_delegate.lib;winmm.lib;ws2_32.lib;Iphlpapi.lib;Userenv.lib;DbgHelp.lib;jsoncpp_static.lib;libcrypto.lib;libssl.lib;Crypt32.lib;srtp2.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>../depend\win\debug\third_party\jsoncpp;../depend\win\debug\uv\lib;../depend\win\debug\absl\lib;../depend\win\debug\openssl\lib;../depend\win\debug\yaml\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>

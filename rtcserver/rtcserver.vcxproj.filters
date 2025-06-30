@@ -159,6 +159,15 @@
     <ClCompile Include="..\3rdpart\libwebrtc\src\rtc_base\string_to_number.cc">
       <Filter>源文件\libwebrtc\rtc_base</Filter>
     </ClCompile>
+    <ClCompile Include="src\pc\dtls_srtp_transport.cpp">
+      <Filter>源文件\pc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pc\srtp_transport.cpp">
+      <Filter>源文件\pc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\pc\srtp_session.cpp">
+      <Filter>源文件\pc</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\base\conf.h">
@@ -279,6 +288,15 @@
       <Filter>源文件\stream</Filter>
     </ClInclude>
     <ClInclude Include="src\pc\stream_params.h">
+      <Filter>源文件\pc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pc\dtls_srtp_transport.h">
+      <Filter>源文件\pc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pc\srtp_transport.h">
+      <Filter>源文件\pc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pc\srtp_session.h">
       <Filter>源文件\pc</Filter>
     </ClInclude>
   </ItemGroup>

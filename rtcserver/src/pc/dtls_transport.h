@@ -52,12 +52,22 @@ public:
     const std::string& transport_name() { return _ice_channel->transport_name(); }
     IceCandidateComponent component() { return _ice_channel->component(); }
     IceTransportChannel* ice_channel() { return _ice_channel; }
+    bool is_dtls_active() { return _dtls_active; }
 
     bool set_local_certificate(rtc::RTCCertificate* cert);
     bool set_remote_fingerprint(const std::string& digest_alg,
             const uint8_t* digest, size_t digest_len);
     std::string to_string();
     DtlsTransportState dtls_state() { return _dtls_state; }
+    //获取加密套件
+    bool get_srtp_crypto_suite(int* selected_crypto_suite);
+    //导出dtls的密钥
+    bool export_keying_material(const std::string& label,
+            const uint8_t* context,
+            size_t context_len,
+            bool use_context,
+            uint8_t* result,
+            size_t result_len);
 
     sigslot::signal2<DtlsTransport*, DtlsTransportState> signal_dtls_state;
     sigslot::signal1<DtlsTransport*> signal_writable_state;
