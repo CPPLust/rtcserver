@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -45,9 +45,11 @@
     <ClCompile Include="src\ice\stun_request.cpp" />
     <ClCompile Include="src\ice\udp_port.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\pc\dtls_srtp_transport.cpp" />
     <ClCompile Include="src\pc\dtls_transport.cpp" />
     <ClCompile Include="src\pc\peer_connection.cpp" />
     <ClCompile Include="src\pc\session_description.cpp" />
+    <ClCompile Include="src\pc\srtp_transport.cpp" />
     <ClCompile Include="src\pc\stream_params.cpp" />
     <ClCompile Include="src\pc\transport_controller.cpp" />
     <ClCompile Include="src\server\rtc_server.cpp" />
@@ -85,10 +87,12 @@
     <ClInclude Include="src\ice\stun_request.h" />
     <ClInclude Include="src\ice\udp_port.h" />
     <ClInclude Include="src\pc\codec_info.h" />
+    <ClInclude Include="src\pc\dtls_srtp_transport.h" />
     <ClInclude Include="src\pc\dtls_transport.h" />
     <ClInclude Include="src\pc\peer_connection.h" />
     <ClInclude Include="src\pc\peer_connection_def.h" />
     <ClInclude Include="src\pc\session_description.h" />
+    <ClInclude Include="src\pc\srtp_transport.h" />
     <ClInclude Include="src\pc\stream_params.h" />
     <ClInclude Include="src\pc\transport_controller.h" />
     <ClInclude Include="src\server\rtc_server.h" />
