@@ -18,6 +18,7 @@ include_directories( ${SRC_PATH}/
     					"${TOP_PATH}/depend/centos/yaml/include/"
    					"${TOP_PATH}/depend/centos/ev/include"
    					"${TOP_PATH}/depend/centos/openssl/include"
+   					"${TOP_PATH}/depend/centos/srtp2"
 					 ${TOP_PATH}/3rdpart/libwebrtc/src 
 					 )
 
@@ -35,6 +36,7 @@ file(GLOB all_src
         "${SRC_PATH}/stream/*.cpp"
         "${SRC_PATH}/pc/*.cpp"
         "${SRC_PATH}/ice/*.cpp"
+        "${SRC_PATH}/module/rtp_rtcp/*"
 )
 
 
@@ -45,12 +47,13 @@ link_directories(
         "${TOP_PATH}/depend/centos/absl/lib64"
         "${TOP_PATH}/depend/centos/openssl/lib"
         "${TOP_PATH}/depend/centos/ev/lib"
+     	"${TOP_PATH}/depend/centos/srtp2"
         )
 
 
 add_executable(xrtcserver ${all_src})
 
 
-target_link_libraries(xrtcserver  libyaml-cpp.a  libjsoncpp.a     libwebrtc.a  libev.a libabsl_strings.a libabsl_throw_delegate.a  libssl.a libcrypto.a  -lpthread -ldl)
+target_link_libraries(xrtcserver  libyaml-cpp.a  libjsoncpp.a     libwebrtc.a  libev.a libabsl_strings.a libabsl_throw_delegate.a libabsl_bad_optional_access.a  libssl.a libcrypto.a  libsrtp2.a -lpthread -ldl)
 
 
