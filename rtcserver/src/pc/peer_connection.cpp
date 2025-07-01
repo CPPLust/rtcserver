@@ -484,12 +484,16 @@ int PeerConnection::send_rtp(const char* data, size_t len) {
     return -1;
 }
 
+int PeerConnection::send_rtcp(const char* data, size_t len) {
+    if (_transport_controller) {
+        // todo: 需要根据实际情况完善
+        return _transport_controller->send_rtcp("audio", data, len);
+    }
+
+    return -1;
+}
+
 } // namespace xrtc
-
-
-
-
-
 
 
 

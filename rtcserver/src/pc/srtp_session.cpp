@@ -222,9 +222,36 @@ bool SrtpSession::protect_rtp(void* p, int in_len, int max_len, int* out_len) {
 
     *out_len = in_len;
     int err = srtp_protect(_session, p, out_len);
-    return err == srtp_err_status_ok;
+    if (err != srtp_err_status_ok) {
+        RTC_LOG(LS_WARNING) << "Failed to protect rtp packet: err=" << err;
+        return false;
+    }
+
+    return true;
 }
 
+bool SrtpSession::protect_rtcp(void* p, int in_len, int max_len, int* out_len) {
+    if (!_session) {
+        RTC_LOG(LS_WARNING) << "Failed to protect rtcp packet: no SRTP session";
+        return false;
+    }
+
+    int need_len = in_len + _rtcp_auth_tag_len + sizeof(uint32_t);
+    if (max_len < need_len) {
+        RTC_LOG(LS_WARNING) << "Failed to protect rtcp packet: The buffer length "
+            << max_len << " is less than needed " << need_len;
+        return false;
+    }
+
+    *out_len = in_len;
+    int err = srtp_protect_rtcp(_session, p, out_len);
+    if (err != srtp_err_status_ok) {
+        RTC_LOG(LS_WARNING) << "Failed to protect rtcp packet: err=" << err;
+        return false;
+    }
+
+    return true;
+}
 } // namespace xrtc
 
 
