@@ -54,6 +54,7 @@ private:
     EventLoop* _el;
     IceAgent* _ice_agent;
     std::map<std::string, DtlsTransport*> _dtls_transport_by_name;
+    //根据传输获取到的transport
     std::map<std::string, DtlsSrtpTransport*> _dtls_srtp_transport_by_name;
     rtc::RTCCertificate* _local_certificate = nullptr;
     //状态

@@ -41,7 +41,7 @@ function stopPull() {
     console.log("send stop pull: /signaling/stoppull");
 
     remoteVideo.srcObject = null;
-    if (remoteStream && localStream.getAudioTracks()) {
+    if (remoteStream && remoteStream.getAudioTracks()) {
         remoteStream.getAudioTracks()[0].stop();
     }
 
@@ -61,7 +61,7 @@ function stopPull() {
     $.post("/signaling/stoppull",
         {"uid": uid, "streamName": streamName},
         function(data, textStatus) {
-            console.log("stop push response: " + JSON.stringify(data));
+            console.log("stop pull response: " + JSON.stringify(data));
             if ("success" == textStatus && 0 == data.errNo) {
                 $("#tips1").html("<font color='blue'>停止拉流请求成功!</font>");
             } else {
@@ -106,7 +106,7 @@ function pullStream() {
     
     pc.onaddstream = function(e) {
         remoteStream = e.stream;
-        remoteVideo.srcOjbect = e.stream;
+        remoteVideo.srcObject = e.stream;
     }
     
     console.log("set remote sdp start");

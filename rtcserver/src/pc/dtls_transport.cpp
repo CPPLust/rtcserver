@@ -465,6 +465,13 @@ bool DtlsTransport::export_keying_material(const std::string& label,
             use_context, result, result_len) : false;
 }
 
+int DtlsTransport::send_packet(const char* data, size_t len) {
+    if (_ice_channel) {
+        return _ice_channel->send_packet(data, len);
+    }
+
+    return -1;
+}
 
 } // namespace xrtc
 

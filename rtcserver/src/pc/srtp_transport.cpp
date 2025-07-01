@@ -59,6 +59,12 @@ void SrtpTransport::_create_srtp_session() {
     _recv_session.reset(new SrtpSession());
 }
 
+void SrtpTransport::get_send_auth_tag_len(int* rtp_auth_tag_len, int* rtcp_auth_tag_len) {
+    if (_send_session) {
+        _send_session->get_auth_tag_len(rtp_auth_tag_len, rtcp_auth_tag_len);
+    }
+}
+
 bool SrtpTransport::unprotect_rtp(void* p, int in_len, int* out_len) {
     if (!is_srtp_active()) {
         return false;
@@ -72,6 +78,13 @@ bool SrtpTransport::unprotect_rtcp(void* p, int in_len, int* out_len) {
     }
     return _recv_session->unprotect_rtcp(p, in_len, out_len);
 } 
+
+bool SrtpTransport::protect_rtp(void* p, int in_len, int max_len, int* out_len) {
+    if (!is_srtp_active()) {
+        return false;
+    }
+    return _send_session->protect_rtp(p, in_len, max_len, out_len);
+}
 
 } // namespace xrtc
 
