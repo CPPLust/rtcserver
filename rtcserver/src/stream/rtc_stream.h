@@ -23,6 +23,8 @@ class RtcStreamListener {
 public:
     //监听状态使用
     virtual void on_connection_state(RtcStream* stream, PeerConnectionState state) = 0;
+    virtual void on_rtp_packet_received(RtcStream* stream, const char* data, size_t len) = 0;
+    virtual void on_rtcp_packet_received(RtcStream* stream, const char* data, size_t len) = 0;
 };
 	
 	/*
@@ -50,10 +52,17 @@ public:
     //流名字
     const std::string& get_stream_name() { return stream_name; }
     
+    int send_rtp(const char* data, size_t len);
+
     std::string to_string();
 
 private:
     void _on_connection_state(PeerConnection*, PeerConnectionState);
+    void _on_rtp_packet_received(PeerConnection*, 
+        rtc::CopyOnWriteBuffer* packet, int64_t /*ts*/);
+    void _on_rtcp_packet_received(PeerConnection*, 
+            rtc::CopyOnWriteBuffer* packet, int64_t /*ts*/);
+
 protected:
     EventLoop* el;
     uint64_t uid;

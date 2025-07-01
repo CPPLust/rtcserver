@@ -29,13 +29,13 @@ bool SrtpSession::update_send(int cs, const uint8_t* key, size_t key_len,
 bool SrtpSession::set_recv(int cs, const uint8_t* key, size_t key_len,
         const std::vector<int>& extension_ids)
 {
-    return _set_key(ssrc_any_outbound, cs, key, key_len, extension_ids);
+    return _set_key(ssrc_any_inbound, cs, key, key_len, extension_ids);
 }
 
 bool SrtpSession::update_recv(int cs, const uint8_t* key, size_t key_len,
         const std::vector<int>& extension_ids)
 {
-    return _update_key(ssrc_any_outbound, cs, key, key_len, extension_ids);
+    return _update_key(ssrc_any_inbound, cs, key, key_len, extension_ids);
 }
 
 bool SrtpSession::_update_key(int type, int cs, const uint8_t* key, size_t key_len,
@@ -168,6 +168,28 @@ bool SrtpSession::_do_set_key(int type, int cs, const uint8_t* key, size_t key_l
     _rtp_auth_tag_len = policy.rtp.auth_tag_len;
     _rtcp_auth_tag_len = policy.rtcp.auth_tag_len;
     return true;
+}
+
+bool SrtpSession::unprotect_rtp(void* p, int in_len, int* out_len) {
+    if (!_session) {
+        RTC_LOG(LS_WARNING) << "Failed to unprotect rtp packet: no SRTP session";
+        return false;
+    }
+    
+    *out_len = in_len;
+    int err = srtp_unprotect(_session, p, out_len);
+    return err == srtp_err_status_ok;
+}
+
+bool SrtpSession::unprotect_rtcp(void* p, int in_len, int* out_len) {
+    if (!_session) {
+        RTC_LOG(LS_WARNING) << "Failed to unprotect rtp packet: no SRTP session";
+        return false;
+    }
+    
+    *out_len = in_len;
+    int err = srtp_unprotect_rtcp(_session, p, out_len);
+    return err == srtp_err_status_ok;
 }
 
 } // namespace xrtc

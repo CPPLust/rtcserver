@@ -44,17 +44,26 @@ public:
     void add_video_source(const std::vector<StreamParams>& source) {
         _video_source = source;
     }
+    int send_rtp(const char* data, size_t len);
 
     sigslot::signal2<PeerConnection*, PeerConnectionState> signal_connection_state;
+    sigslot::signal3<PeerConnection*, rtc::CopyOnWriteBuffer*, int64_t>
+        signal_rtp_packet_received;
+    sigslot::signal3<PeerConnection*, rtc::CopyOnWriteBuffer*, int64_t>
+        signal_rtcp_packet_received;
 
 private:
    
-    void on_candidate_allocate_done(TransportController* transport_controller,
+    void _on_candidate_allocate_done(TransportController* transport_controller,
             const std::string& transport_name,
             IceCandidateComponent component,
             const std::vector<Candidate>& candidate);
     
     void _on_connection_state(TransportController*, PeerConnectionState state);
+    void _on_rtp_packet_received(TransportController*,
+            rtc::CopyOnWriteBuffer* packet, int64_t ts);
+    void _on_rtcp_packet_received(TransportController*,
+            rtc::CopyOnWriteBuffer* packet, int64_t ts);
 
     friend void destroy_timer_cb(EventLoop* el, TimerWatcher* w, void* data);
 

@@ -179,6 +179,24 @@ void RtcStreamManager::on_connection_state(RtcStream* stream,
     }
 }
 
+void RtcStreamManager::on_rtp_packet_received(RtcStream* stream, 
+        const char* data, size_t len) 
+{
+    RTC_LOG(LS_INFO) << "+++++++++++++RECV PACKET rtp " << len;
+  /*  if (RtcStreamType::k_push == stream->stream_type()) {
+        PullStream* pull_stream = _find_pull_stream(stream->get_stream_name());
+        if (pull_stream) {
+            pull_stream->send_rtp(data, len);
+        }
+    }*/
+}
+
+void RtcStreamManager::on_rtcp_packet_received(RtcStream* stream, 
+        const char* data, size_t len)
+{
+    RTC_LOG(LS_INFO) << "+++++++++++++RECV PACKET rtcp " << len;
+}
+
 } // namespace xrtc
 
 
